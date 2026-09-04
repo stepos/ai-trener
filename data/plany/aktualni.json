@@ -1,0 +1,1173 @@
+{
+  "schema": 1,
+  "vygenerovano": "2026-09-04",
+  "plati_od": "2026-09-05",
+  "plati_do": "2026-10-02",
+  "zdroj": "data/sablony.json + data/cviky.json",
+  "jednotky": [
+    {
+      "datum": "2026-09-05",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-07",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-09",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-12",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-14",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-16",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-19",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-21",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-23",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-26",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-28",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-hrudnik-stroj",
+            "jednorucky-sikma",
+            "peck-deck",
+            "kladky-vsede"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "zakopavani-vleze",
+            "zakopavani-vsede",
+            "hip-thrust",
+            "glute-bridge"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "stahovani-kladky",
+            "stahovani-jednoruc",
+            "shyby-dopomoc",
+            "pullover-kladka"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "upazovani-stoje",
+            "upazovani-kladka",
+            "upazovani-stroj",
+            "upazovani-vsede"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "triceps-kladka",
+            "francouzsky-tlak",
+            "dipy-stroj",
+            "kickback"
+          ]
+        },
+        {
+          "poradi": 7,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ],
+          "volitelne": true
+        }
+      ]
+    },
+    {
+      "datum": "2026-09-30",
+      "typ": "B",
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "poradi": 1,
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press-jednonoz",
+            "vystupy-bedynka",
+            "farmarska-chuze"
+          ]
+        },
+        {
+          "poradi": 2,
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "veslovani-opora",
+            "veslovani-kladka",
+            "pritahy-jednorucka",
+            "tbar-opora"
+          ]
+        },
+        {
+          "poradi": 3,
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120,
+          "volby": [
+            "leg-press",
+            "hack-drep",
+            "predkopavani",
+            "leg-press-jednonoz"
+          ]
+        },
+        {
+          "poradi": 4,
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120,
+          "volby": [
+            "tlaky-ramena-stroj",
+            "jednorucky-ramena-vsede",
+            "tlaky-smith-vsede"
+          ]
+        },
+        {
+          "poradi": 5,
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90,
+          "volby": [
+            "biceps-jednorucky",
+            "biceps-kladka",
+            "biceps-kladivo",
+            "biceps-ez"
+          ]
+        },
+        {
+          "poradi": 6,
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90,
+          "volby": [
+            "pallof-press",
+            "mrtvy-brouk",
+            "plank",
+            "crunch-kladka"
+          ]
+        }
+      ]
+    }
+  ]
+}

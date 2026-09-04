@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI trenér</title>
+<style>
+:root{
+  --bg:#f5f5f4; --panel:#fff; --text:#1c1917; --dim:#78716c; --line:#e7e5e4;
+  --akce:#0f766e; --akce-text:#fff; --zvyraz:#0d9488; --varovani:#b45309;
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0c0a09; --panel:#1c1917; --text:#f5f5f4; --dim:#a8a29e; --line:#292524;
+         --akce:#14b8a6; --akce-text:#022c22; --zvyraz:#2dd4bf; --varovani:#f59e0b; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);-webkit-text-size-adjust:100%}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:1.35rem;margin:0 0 4px}
+h2{font-size:1.05rem;margin:0 0 10px}
+.dim{color:var(--dim)}
+.small{font-size:.85rem}
+button{font:inherit;cursor:pointer;border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--panel);color:var(--text);padding:14px 16px;width:100%;text-align:left}
+button:active{transform:scale(.99)}
+.hlavni{background:var(--akce);color:var(--akce-text);border-color:transparent;
+  font-weight:600;text-align:center}
+.stred{text-align:center}
+.karta{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin-bottom:10px}
+.mrizka{display:grid;gap:8px}
+.radek{display:flex;gap:8px;align-items:center}
+.radek>*{flex:1}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:52px;height:52px;padding:0;text-align:center;font-size:1.3rem;flex:none}
+.stepper .hodnota{flex:1;text-align:center;font-size:1.5rem;font-weight:600;
+  font-variant-numeric:tabular-nums}
+.znacka{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:999px;
+  background:var(--line);color:var(--dim)}
+.hotovo{opacity:.55}
+.nahrady{margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:6px}
+.nahrady-popis{font-size:.8rem;color:var(--dim);margin-top:10px}
+.nahrada{width:100%;height:100%;padding:8px 12px;font-size:.85rem;border-radius:10px;
+  background:var(--bg);color:var(--text);border:1px solid var(--line);
+  text-align:left;line-height:1.3}
+.serie-tecky{display:flex;gap:6px;margin-top:8px}
+.tecka{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);
+  display:grid;place-items:center;font-size:.75rem;color:var(--dim)}
+.tecka.ok{background:var(--akce);border-color:var(--akce);color:var(--akce-text)}
+.pauza{position:sticky;bottom:0;background:var(--akce);color:var(--akce-text);
+  border-radius:var(--radius);padding:12px;text-align:center;font-weight:600;margin-top:12px}
+ul{margin:6px 0;padding-left:20px}
+li{margin:2px 0}
+.varuj{color:var(--varovani);font-weight:600}
+.skryt{display:none!important}
+.zpet{background:none;border:none;color:var(--dim);padding:8px 0;width:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+td{padding:4px 0;border-bottom:1px solid var(--line)}
+input[type=file]{font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>window.AI_TRENER_DATA = {"cviky": [{"id": "leg-press", "nazev": "Leg press (horizontální / 45°)", "sloty": ["kvadricepsy"], "typ": "stroj", "provedeni": ["Záda i kříž celou plochou opřené o opěrku.", "Chodidla na šířku pánve, celá plocha na desce.", "Dolů kontrolovaně, kolena mířívají ven ve směru špiček.", "Nahoře kolena nepropínat, nechat mírné pokrčení."], "chyby": ["odlepení kříže od opěrky ve spodní poloze", "propnutí kolen v horní poloze", "kolena padající dovnitř"], "dech": "výdech při tlaku"}, {"id": "hack-drep", "nazev": "Hack dřep na stroji", "sloty": ["kvadricepsy"], "typ": "stroj", "provedeni": ["Záda opřená o opěrku, ramena pod podložkami.", "Chodidla na šířku pánve, mírně před tělem.", "Dolů do pohodlného rozsahu, kolena ven."], "chyby": ["odlepení beder", "příliš hluboký sed přes bolest kolen"], "dech": "výdech nahoru"}, {"id": "predkopavani", "nazev": "Předkopávání vsedě", "sloty": ["kvadricepsy"], "typ": "stroj", "provedeni": ["Osa stroje v úrovni kolene.", "Záda opřená, pás zapnutý.", "Nahoru bez švihu, nahoře krátká výdrž."], "chyby": ["švih trupem", "trhavý návrat dolů"], "dech": "výdech při natažení"}, {"id": "leg-press-jednonoz", "nazev": "Leg press jednonož", "sloty": ["kvadricepsy", "nohy-funkcne"], "typ": "stroj", "provedeni": ["Stejné nastavení jako oboustranný, jen jedna noha na desce.", "Menší váha, důraz na stejný rozsah u obou nohou."], "chyby": ["nakláněné boky", "různý rozsah levá/pravá"], "dech": "výdech při tlaku"}, {"id": "zakopavani-vleze", "nazev": "Zakopávání vleže", "sloty": ["hamstringy"], "typ": "stroj", "provedeni": ["Osa stroje v úrovni kolene.", "Boky na podložce, nezvedat pánev.", "Zpět pomalu, 3 s excentrická fáze."], "chyby": ["zvedání pánve", "rychlý pád závaží"], "dech": "výdech při krčení"}, {"id": "zakopavani-vsede", "nazev": "Zakopávání vsedě", "sloty": ["hamstringy"], "typ": "stroj", "provedeni": ["Záda opřená, pás přes stehna dotažený.", "Pohyb jen v koleni.", "Návrat pomalý."], "chyby": ["odlepení stehen od sedáku"], "dech": "výdech při krčení"}, {"id": "hip-thrust", "nazev": "Hip thrust s oporou", "sloty": ["hamstringy"], "typ": "činka / stroj", "provedeni": ["Lopatky opřené o lavici.", "Chodidla na šířku pánve, holeně svisle v horní poloze.", "Nahoře plná extenze kyčlí, žebra dolů — neprohýbat se v kříži."], "chyby": ["prohnutí v bedrech místo extenze kyčlí", "zvedání pat"], "dech": "výdech nahoru"}, {"id": "glute-bridge", "nazev": "Glute bridge se zátěží", "sloty": ["hamstringy"], "typ": "vlastní váha + zátěž", "provedeni": ["Leh na zádech, kolena pokrčená.", "Zvednout pánev do přímky rameno–kyčel–koleno.", "Nahoře 1–2 s výdrž."], "chyby": ["přehnaný záklon v kříži"], "dech": "výdech nahoru"}, {"id": "vystupy-bedynka", "nazev": "Výstupy na nízkou bedýnku s oporou", "sloty": ["nohy-funkcne"], "typ": "vlastní váha / jednoručky", "provedeni": ["Schod 15–20 cm.", "Opora rukou o madlo.", "Plný došlap celou nohou, ne špičkou.", "Dolů kontrolovaně, ne pádem."], "chyby": ["odraz zadní nohou", "došlap na špičku"], "dech": "výdech při výstupu", "pozor": "Vždy s oporou o madlo, dokud si nejsi jistý rovnováhou."}, {"id": "farmarska-chuze", "nazev": "Farmářská chůze podél zdi", "sloty": ["nohy-funkcne"], "typ": "jednoručky", "provedeni": ["Jednoručky v obou rukou, trup vzpřímený.", "Jít podél zdi nebo madla.", "Ramena dolů, bez úklonů do stran."], "chyby": ["úklon trupu", "krčení ramen"], "dech": "plynule, nezadržovat", "pozor": "Podél zdi nebo madla — je to cvik na stabilitu trupu, ne závod."}, {"id": "stahovani-kladky", "nazev": "Stahování horní kladky k hrudníku", "sloty": ["zada-sirka"], "typ": "kladka", "provedeni": ["Stehna zaaretovaná pod podložkami.", "Hrudník vzhůru, lehký záklon max. 10–15°.", "Táhnout lokty dolů a dozadu, ne rukama."], "chyby": ["záklon celým trupem", "tahání za krk"], "dech": "výdech při stahování"}, {"id": "stahovani-jednoruc", "nazev": "Stahování kladky jednoruč", "sloty": ["zada-sirka"], "typ": "kladka", "provedeni": ["Jedna ruka, druhá se opírá.", "Plný rozsah, nahoře nechat lopatku vytáhnout."], "chyby": ["rotace trupu"], "dech": "výdech při stahování"}, {"id": "shyby-dopomoc", "nazev": "Shyby s dopomocí stroje", "sloty": ["zada-sirka"], "typ": "stroj", "provedeni": ["Nastavit protiváhu tak, aby šlo 8–12 opakování s rezervou 2–3.", "Nahoru bez švihu, dolů pomalu."], "chyby": ["houpání", "neúplný rozsah"], "dech": "výdech nahoru"}, {"id": "pullover-kladka", "nazev": "Pullover na kladce", "sloty": ["zada-sirka"], "typ": "kladka", "provedeni": ["Mírný předklon, lokty téměř natažené a zafixované.", "Táhnout obloukem k stehnům."], "chyby": ["krčení loktů — mění se to na triceps"], "dech": "výdech při tahu dolů"}, {"id": "veslovani-opora", "nazev": "Veslování s oporou hrudníku", "sloty": ["zada-tloustka"], "typ": "stroj", "provedeni": ["Hrudník opřený o podložku — kříž tím není zatížený.", "Táhnout lokty dozadu, lopatky k sobě.", "Návrat kontrolovaně, lopatky nechat rozjet."], "chyby": ["odlepení hrudníku od opěrky", "škubání trupem"], "dech": "výdech při přítahu", "pozor": "Opora hrudníku drží bedra mimo hru — proto je to hlavní volba."}, {"id": "veslovani-kladka", "nazev": "Veslování vsedě na kladce", "sloty": ["zada-tloustka"], "typ": "kladka", "provedeni": ["Kolena mírně pokrčená, záda vzpřímená.", "Táhnout k břichu, lokty u těla.", "Trup se nehoupe dopředu a dozadu."], "chyby": ["záklon a předklon trupu jako pumpa", "kulacení zad při návratu"], "dech": "výdech při přítahu"}, {"id": "pritahy-jednorucka", "nazev": "Přítahy jednoručky s oporou", "sloty": ["zada-tloustka"], "typ": "jednoručka", "provedeni": ["Koleno a ruka na lavici, záda rovná.", "Táhnout loket podél těla dozadu.", "Nerotovat trupem."], "chyby": ["rotace trupu za vahou", "tah rukou místo zády"], "dech": "výdech při přítahu"}, {"id": "tbar-opora", "nazev": "T-bar s oporou hrudníku", "sloty": ["zada-tloustka"], "typ": "stroj", "provedeni": ["Hrudník na opěrce, chodidla pevně.", "Lokty dozadu, lopatky k sobě."], "chyby": ["odlepení hrudníku"], "dech": "výdech při přítahu"}, {"id": "tlaky-hrudnik-stroj", "nazev": "Tlaky na hrudník vsedě na stroji", "sloty": ["hrudnik"], "typ": "stroj", "provedeni": ["Trup a hlava opřené.", "Madla ve výšce středu hrudníku.", "Lokty nerozkládat do pravého úhlu, spíš 45°.", "Nahoře lokty nepropínat."], "chyby": ["odlepení hlavy a zad", "propnutí loktů"], "dech": "výdech při tlaku"}, {"id": "jednorucky-sikma", "nazev": "Jednoručky na šikmé lavici", "sloty": ["hrudnik"], "typ": "jednoručky", "provedeni": ["Sklon lavice 20–30°.", "Záda opřená, lopatky stažené k sobě.", "Dolů do pohodlného rozsahu, ne přes bolest ramene."], "chyby": ["příliš velký sklon — mění se to na ramena", "vyklenutí hrudníku přes míru"], "dech": "výdech při tlaku"}, {"id": "peck-deck", "nazev": "Peck deck", "sloty": ["hrudnik"], "typ": "stroj", "provedeni": ["Lokty ve výšce ramen, mírně pokrčené.", "Stahovat obloukem před hrudník.", "Návrat kontrolovaně, ne až na doraz dozadu."], "chyby": ["přetažení ramen dozadu", "švih"], "dech": "výdech při stahování"}, {"id": "kladky-vsede", "nazev": "Stahování kladek vsedě před tělo", "sloty": ["hrudnik"], "typ": "kladka", "provedeni": ["Vsedě s oporou zad.", "Lokty mírně pokrčené a zafixované.", "Ruce k sobě před hrudníkem."], "chyby": ["krčení loktů", "předklon trupu"], "dech": "výdech při stahování"}, {"id": "tlaky-ramena-stroj", "nazev": "Tlaky na ramena vsedě na stroji", "sloty": ["ramena-tlak"], "typ": "stroj", "provedeni": ["Záda opřená, neutrální úchop dlaněmi k sobě.", "Tlak nahoru bez propnutí loktů.", "Dolů do úrovně uší, ne hlouběji."], "chyby": ["propnutí loktů", "prohnutí v kříži"], "dech": "výdech při tlaku"}, {"id": "jednorucky-ramena-vsede", "nazev": "Jednoručky vsedě s oporou zad", "sloty": ["ramena-tlak"], "typ": "jednoručky", "provedeni": ["Opěrka lavice téměř svisle.", "Jednoručky do neutrálního úchopu.", "Nahoře nepropínat."], "chyby": ["odlepení zad od opěrky"], "dech": "výdech při tlaku"}, {"id": "tlaky-smith-vsede", "nazev": "Tlaky v Smithi vsedě", "sloty": ["ramena-tlak"], "typ": "stroj", "provedeni": ["Lavice pod osou, opora zad.", "Osa jde před obličejem, ne za hlavou."], "chyby": ["tlak za hlavu"], "dech": "výdech při tlaku", "pozor": "Osa jde před obličejem, nikdy za hlavu."}, {"id": "upazovani-stoje", "nazev": "Upažování s jednoručkami ve stoje", "sloty": ["ramena-bocni"], "typ": "jednoručky", "provedeni": ["Malá váha, lokty mírně pokrčené.", "Zvedat do výšky ramen, ne výš.", "Bez švihu a bez pokrčení kolen."], "chyby": ["švih celým tělem", "krčení ramen k uším"], "dech": "výdech při zvedání", "pozor": "Váhy jsou malé, švih trupem si tu nikdo nemůže dovolit."}, {"id": "upazovani-kladka", "nazev": "Upažování na kladce", "sloty": ["ramena-bocni"], "typ": "kladka", "provedeni": ["Kladka dole, tah přes tělo do strany.", "Trup nehybný."], "chyby": ["úklon trupu proti tahu"], "dech": "výdech při zvedání"}, {"id": "upazovani-stroj", "nazev": "Upažování na stroji", "sloty": ["ramena-bocni"], "typ": "stroj", "provedeni": ["Osa v úrovni ramenního kloubu.", "Do výšky ramen."], "chyby": ["příliš vysoký rozsah"], "dech": "výdech při zvedání"}, {"id": "upazovani-vsede", "nazev": "Upažování vsedě", "sloty": ["ramena-bocni"], "typ": "jednoručky", "provedeni": ["Vsedě na lavici, trup vzpřímený.", "Odpadá švih nohama — čistší provedení."], "chyby": ["záklon trupu"], "dech": "výdech při zvedání"}, {"id": "face-pull", "nazev": "Face pull", "sloty": ["ramena-zadni"], "typ": "kladka", "provedeni": ["Kladka ve výšce obličeje.", "Táhnout lano k čelu, lokty vysoko.", "Nahoře krátká výdrž, lopatky k sobě."], "chyby": ["tah k hrudníku místo k obličeji", "spadlé lokty"], "dech": "výdech při přítahu"}, {"id": "reverse-peck-deck", "nazev": "Reverse peck deck", "sloty": ["ramena-zadni"], "typ": "stroj", "provedeni": ["Hrudník na opěrce, lokty mírně pokrčené.", "Rozpažit do úrovně ramen."], "chyby": ["přetažení za rovinu ramen"], "dech": "výdech při rozpažení"}, {"id": "rozpazovani-kladka", "nazev": "Rozpažování na kladkách", "sloty": ["ramena-zadni"], "typ": "kladka", "provedeni": ["Kladky křížem ve výšce ramen.", "Rozpažit obloukem, lokty zafixované."], "chyby": ["krčení loktů"], "dech": "výdech při rozpažení"}, {"id": "biceps-jednorucky", "nazev": "Zdvih s jednoručkami ve stoje", "sloty": ["biceps"], "typ": "jednoručky", "provedeni": ["Lokty u těla, nehýbat jimi dopředu.", "Nahoru bez houpání trupem.", "Dolů kontrolovaně do plného natažení."], "chyby": ["houpání trupem", "posun loktů dopředu"], "dech": "výdech při zdvihu"}, {"id": "biceps-kladka", "nazev": "Zdvih na kladce", "sloty": ["biceps"], "typ": "kladka", "provedeni": ["Kladka dole, lokty u těla.", "Konstantní tah v celém rozsahu."], "chyby": ["záklon trupu"], "dech": "výdech při zdvihu"}, {"id": "biceps-kladivo", "nazev": "Kladivový zdvih", "sloty": ["biceps"], "typ": "jednoručky", "provedeni": ["Neutrální úchop, palce nahoru.", "Lokty u těla."], "chyby": ["švih"], "dech": "výdech při zdvihu"}, {"id": "biceps-ez", "nazev": "EZ činka", "sloty": ["biceps"], "typ": "činka", "provedeni": ["Úchop v zalomení osy — šetrnější k zápěstí.", "Lokty u těla."], "chyby": ["houpání trupem"], "dech": "výdech při zdvihu"}, {"id": "triceps-kladka", "nazev": "Stahování kladky na triceps", "sloty": ["triceps"], "typ": "kladka", "provedeni": ["Lokty u těla, zafixované.", "Dolů do plného natažení, nahoru jen do pravého úhlu."], "chyby": ["odjíždějící lokty", "předklon a tlačení vahou těla"], "dech": "výdech při stahování"}, {"id": "francouzsky-tlak", "nazev": "Francouzský tlak vsedě", "sloty": ["triceps"], "typ": "jednoručka / EZ", "provedeni": ["Vsedě s oporou zad.", "Lokty směřují vzhůru a zůstávají na místě.", "Za hlavu jen do pohodlného rozsahu."], "chyby": ["rozjíždějící se lokty do stran"], "dech": "výdech při natažení"}, {"id": "dipy-stroj", "nazev": "Asistované dipy na stroji", "sloty": ["triceps"], "typ": "stroj", "provedeni": ["Protiváha tak, aby šlo 10–15 opakování s rezervou.", "Trup mírně vzpřímený, lokty dozadu."], "chyby": ["příliš hluboký sestup přes bolest ramene"], "dech": "výdech nahoru"}, {"id": "kickback", "nazev": "Kickback", "sloty": ["triceps"], "typ": "jednoručka / kladka", "provedeni": ["Paže rovnoběžně s trupem, loket zafixovaný.", "Natažení vzad, krátká výdrž."], "chyby": ["pohyb v rameni místo v lokti"], "dech": "výdech při natažení"}, {"id": "pallof-press", "nazev": "Pallof press na kladce", "sloty": ["stred-tela"], "typ": "kladka", "provedeni": ["Vsedě nebo v kleku, bokem ke kladce.", "Ruce od hrudníku dopředu, výdrž 2 s.", "Bránit rotaci trupu — o to jde."], "chyby": ["rotace trupu za tahem", "zadržený dech"], "dech": "plynule, nezadržovat", "pozor": "Vsedě nebo v kleku je to stabilnější než ve stoje."}, {"id": "mrtvy-brouk", "nazev": "Mrtvý brouk", "sloty": ["stred-tela"], "typ": "vlastní váha", "provedeni": ["Leh na zádech, bedra přitisknutá k podložce.", "Střídavě natahovat protilehlou ruku a nohu.", "Bedra se nesmí odlepit."], "chyby": ["prohnutí v bedrech", "rychlé tempo"], "dech": "výdech při natažení"}, {"id": "plank", "nazev": "Plank", "sloty": ["stred-tela"], "typ": "vlastní váha", "provedeni": ["Předloktí pod rameny, tělo v přímce.", "Žebra dolů, hýždě zpevněné.", "Držet 20–45 s, ne do vyčerpání."], "chyby": ["propadlá pánev", "zadržený dech"], "dech": "plynule, nezadržovat"}, {"id": "crunch-kladka", "nazev": "Crunch na kladce", "sloty": ["stred-tela"], "typ": "kladka", "provedeni": ["V kleku, lano za hlavou.", "Krčit trup obloukem, pohyb vychází z břicha.", "Boky zůstávají na místě."], "chyby": ["tah rukama za krk", "pohyb z kyčlí"], "dech": "výdech při krčení"}], "sloty": [{"id": "kvadricepsy", "nazev": "Kvadricepsy", "partie": "nohy"}, {"id": "hamstringy", "nazev": "Hamstringy a hýždě", "partie": "nohy"}, {"id": "nohy-funkcne", "nazev": "Nohy funkčně", "partie": "nohy"}, {"id": "zada-sirka", "nazev": "Záda — šířka", "partie": "zada"}, {"id": "zada-tloustka", "nazev": "Záda — tloušťka", "partie": "zada"}, {"id": "hrudnik", "nazev": "Hrudník", "partie": "hrudnik"}, {"id": "ramena-tlak", "nazev": "Ramena — tlak", "partie": "ramena"}, {"id": "ramena-bocni", "nazev": "Ramena — boční", "partie": "ramena"}, {"id": "ramena-zadni", "nazev": "Ramena — zadní", "partie": "ramena"}, {"id": "biceps", "nazev": "Biceps", "partie": "paze"}, {"id": "triceps", "nazev": "Triceps", "partie": "paze"}, {"id": "stred-tela", "nazev": "Střed těla", "partie": "stred"}], "sablony": {"schema": 1, "zdroj": "ukázková sada — full body A/B, 3× týdně", "aktualizovano": "2026-09-04", "jednotky": {"A": {"nazev": "Full body A", "bloky": [{"slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165}, {"slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90}, {"slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90}, {"slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volitelne": true}]}, "B": {"nazev": "Full body B", "bloky": [{"slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120}, {"slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120}, {"slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120}, {"slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90}, {"slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90}]}}, "podle_nalady": {"nohy": [{"slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165}, {"slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120}], "zada": [{"slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "ramena-zadni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90}], "hrudnik": [{"slot": "hrudnik", "serie": 4, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120}, {"slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120}, {"slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90}], "ramena": [{"slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120}, {"slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90}, {"slot": "ramena-zadni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90}], "paze": [{"slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90}, {"slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90}], "stred": [{"slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90}]}}, "plan": {"schema": 1, "vygenerovano": "2026-09-04", "plati_od": "2026-09-05", "plati_do": "2026-10-02", "zdroj": "data/sablony.json + data/cviky.json", "jednotky": [{"datum": "2026-09-05", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-07", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}, {"datum": "2026-09-09", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-12", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}, {"datum": "2026-09-14", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-16", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}, {"datum": "2026-09-19", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-21", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}, {"datum": "2026-09-23", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-26", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}, {"datum": "2026-09-28", "typ": "A", "nazev": "Full body A", "bloky": [{"poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 165, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 2, "slot": "hrudnik", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["tlaky-hrudnik-stroj", "jednorucky-sikma", "peck-deck", "kladky-vsede"]}, {"poradi": 3, "slot": "hamstringy", "serie": 3, "opakovani": "12", "rezerva": "2-3", "pauza_s": 120, "volby": ["zakopavani-vleze", "zakopavani-vsede", "hip-thrust", "glute-bridge"]}, {"poradi": 4, "slot": "zada-sirka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["stahovani-kladky", "stahovani-jednoruc", "shyby-dopomoc", "pullover-kladka"]}, {"poradi": 5, "slot": "ramena-bocni", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["upazovani-stoje", "upazovani-kladka", "upazovani-stroj", "upazovani-vsede"]}, {"poradi": 6, "slot": "triceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["triceps-kladka", "francouzsky-tlak", "dipy-stroj", "kickback"]}, {"poradi": 7, "slot": "nohy-funkcne", "serie": 3, "opakovani": "20 m", "rezerva": "4", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"], "volitelne": true}]}, {"datum": "2026-09-30", "typ": "B", "nazev": "Full body B", "bloky": [{"poradi": 1, "slot": "nohy-funkcne", "serie": 3, "opakovani": "8-10 / nohu", "rezerva": "3", "pauza_s": 120, "volby": ["leg-press-jednonoz", "vystupy-bedynka", "farmarska-chuze"]}, {"poradi": 2, "slot": "zada-tloustka", "serie": 3, "opakovani": "10-12", "rezerva": "2-3", "pauza_s": 120, "volby": ["veslovani-opora", "veslovani-kladka", "pritahy-jednorucka", "tbar-opora"]}, {"poradi": 3, "slot": "kvadricepsy", "serie": 3, "opakovani": "12-15", "rezerva": "2-3", "pauza_s": 120, "volby": ["leg-press", "hack-drep", "predkopavani", "leg-press-jednonoz"]}, {"poradi": 4, "slot": "ramena-tlak", "serie": 3, "opakovani": "10-12", "rezerva": "3", "pauza_s": 120, "volby": ["tlaky-ramena-stroj", "jednorucky-ramena-vsede", "tlaky-smith-vsede"]}, {"poradi": 5, "slot": "biceps", "serie": 3, "opakovani": "10-15", "rezerva": "2-3", "pauza_s": 90, "volby": ["biceps-jednorucky", "biceps-kladka", "biceps-kladivo", "biceps-ez"]}, {"poradi": 6, "slot": "stred-tela", "serie": 3, "opakovani": "10 / stranu", "rezerva": "3", "pauza_s": 90, "volby": ["pallof-press", "mrtvy-brouk", "plank", "crunch-kladka"]}]}]}};</script>
+<script>
+"use strict";
+
+/* ---------- Data -------------------------------------------------------
+   V kódu nejsou žádné cviky ani plány. Berou se v tomhle pořadí:
+   1) window.AI_TRENER_DATA — vloží build-app.sh do jednosouborové verze
+   2) ./data/*.json         — když stránka běží ze složky repa
+   3) ruční načtení souboru — záchrana pro iOS bez signálu             */
+
+const ULOZ = { historie: "ai-trener-historie", data: "ai-trener-data", beh: "ai-trener-beh" };
+
+function nactiZUloziste(klic) {
+  try { const v = localStorage.getItem(klic); return v ? JSON.parse(v) : null; }
+  catch (e) { return null; }
+}
+function ulozDoUloziste(klic, hodnota) {
+  try { localStorage.setItem(klic, JSON.stringify(hodnota)); return true; }
+  catch (e) { return false; }
+}
+
+let DATA = null;     // { cviky, sloty, sablony, plan }
+let STAV = null;     // rozcvičený trénink
+
+async function nactiData() {
+  if (window.AI_TRENER_DATA) return window.AI_TRENER_DATA;
+  // Aplikace může ležet ve složce app/ (repo posilovani) nebo v kořeni
+  // (samostatné repo), proto se zkouší obě cesty.
+  for (const zaklad of ["../data/", "data/"]) {
+    try {
+      const [cviky, sablony, plan] = await Promise.all([
+        fetch(zaklad + "cviky.json").then(r => r.json()),
+        fetch(zaklad + "sablony.json").then(r => r.json()),
+        fetch(zaklad + "plany/aktualni.json").then(r => r.json()).catch(() => null)
+      ]);
+      return { cviky: cviky.cviky, sloty: cviky.sloty, sablony: sablony, plan: plan };
+    } catch (e) { /* zkusí se další cesta */ }
+  }
+  return nactiZUloziste(ULOZ.data);
+}
+
+/* ---------- Připojená složka dat --------------------------------------
+   Vzor je ve Fingo-web: odkaz na soubor se uloží do IndexedDB, takže se
+   aplikace po restartu připojí ke stejné databázi bez ptaní. Localstorage
+   to neumí — handle se do JSONu neserializuje.
+
+   Funguje jen v Chrome a Edge na počítači. Safari showDirectoryPicker
+   nepodporuje ani na macOS, ani na iOS, takže na telefonu jede načtení
+   souboru a export textem.                                              */
+
+const SLOZKA_DB = "ai-trener-slozka";
+let slozka = null;                  // FileSystemDirectoryHandle
+
+function idb() {
+  return new Promise((splneno, chyba) => {
+    const r = indexedDB.open(SLOZKA_DB, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("handles");
+    r.onsuccess = () => splneno(r.result);
+    r.onerror = () => chyba(r.error);
+  });
+}
+async function ulozSlozku(handle) {
+  try {
+    const db = await idb();
+    await new Promise((ok, ne) => {
+      const t = db.transaction("handles", "readwrite");
+      t.objectStore("handles").put(handle, "data");
+      t.oncomplete = ok; t.onerror = () => ne(t.error);
+    });
+  } catch (e) { /* bez uložení to jede dál, jen se bude ptát znovu */ }
+}
+async function nactiUlozenouSlozku() {
+  try {
+    const db = await idb();
+    return await new Promise((ok, ne) => {
+      const t = db.transaction("handles", "readonly");
+      const r = t.objectStore("handles").get("data");
+      r.onsuccess = () => ok(r.result || null);
+      r.onerror = () => ne(r.error);
+    });
+  } catch (e) { return null; }
+}
+
+const podporujeSlozku = typeof window.showDirectoryPicker === "function";
+
+/** Přečte jeden JSON ze složky. Chybějící soubor není chyba — vrátí null. */
+async function zeSlozky(handle, ...cesta) {
+  try {
+    let d = handle;
+    for (const c of cesta.slice(0, -1)) d = await d.getDirectoryHandle(c);
+    const f = await d.getFileHandle(cesta[cesta.length - 1]);
+    return JSON.parse(await (await f.getFile()).text());
+  } catch (e) { return null; }
+}
+
+async function nactiZeSlozky(handle) {
+  const cviky = await zeSlozky(handle, "cviky.json");
+  if (!cviky || !cviky.cviky) throw new Error("ve složce není cviky.json");
+  const sablony = await zeSlozky(handle, "sablony.json");
+  const plan = await zeSlozky(handle, "plany", "aktualni.json");
+  return { cviky: cviky.cviky, sloty: cviky.sloty,
+           sablony: sablony || { podle_nalady: {} }, plan: plan };
+}
+
+/** Zapíše odcvičený trénink rovnou do složky — odpadá ruční export. */
+async function zapisDoSlozky(zaznam) {
+  if (!slozka) return false;
+  try {
+    const dir = await slozka.getDirectoryHandle("historie", { create: true });
+    const jmeno = `trenink-${zaznam.datum}-${(zaznam.zacatek || "").replace(":", "")}.json`;
+    const f = await dir.getFileHandle(jmeno, { create: true });
+    const w = await f.createWritable();
+    await w.write(JSON.stringify(zaznam, null, 2));
+    await w.close();
+    return jmeno;
+  } catch (e) { return false; }
+}
+
+async function pripojSlozku() {
+  try {
+    const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+    const nova = await nactiZeSlozky(handle);
+    slozka = handle;
+    await ulozSlozku(handle);
+    DATA = nova;
+    ulozDoUloziste(ULOZ.data, DATA);
+    obrazovkaStart();
+  } catch (e) {
+    if (e && e.name === "AbortError") return;      // uživatel dialog zavřel
+    alert("Složku se nepodařilo připojit: " + (e && e.message ? e.message : e));
+  }
+}
+
+/* ---------- Pomocné ---------- */
+const $ = (sel) => document.querySelector(sel);
+const app = () => document.getElementById("app");
+const dnes = () => new Date().toISOString().slice(0, 10);
+const cvik = (id) => DATA.cviky.find(c => c.id === id);
+const slotNazev = (id) => (DATA.sloty.find(s => s.id === id) || {}).nazev || id;
+
+function historie() { return nactiZUloziste(ULOZ.historie) || []; }
+
+/** Poslední odcvičená váha a opakování u cviku. Čte se z historie v prohlížeči. */
+function posledni(cvikId) {
+  const h = historie();
+  for (let i = h.length - 1; i >= 0; i--) {
+    const s = (h[i].serie || []).filter(x => x.cvik === cvikId);
+    if (s.length) { const p = s[s.length - 1]; return { datum: h[i].datum, vaha: p.vaha_kg, op: p.opakovani }; }
+  }
+  return null;
+}
+
+/** Čeština: 1 série, 2-4 série, 5+ sérií. */
+function mnozne(n, jedna, dva, pet) { return n === 1 ? jedna : (n >= 2 && n <= 4 ? dva : pet); }
+
+/** Poslední série u jiného cviku ze stejného slotu — leg press a leg press
+    jednonož se váhou moc neliší, takže je to lepší start než nula. */
+function posledniVeSlotu(slot, krome) {
+  const zdroje = [...historie()];
+  if (STAV) zdroje.push({ serie: STAV.bloky.filter(b => b.cvik)
+    .flatMap(b => b.hotove.map(h => ({ ...h, slot: b.slot, cvik: b.cvik }))) });
+  for (let i = zdroje.length - 1; i >= 0; i--) {
+    const s = (zdroje[i].serie || []).filter(x => x.slot === slot && x.cvik !== krome);
+    if (s.length) return s[s.length - 1];
+  }
+  return null;
+}
+
+/** Úplně poslední zapsaná série, ať už u čehokoliv. Poslední záchrana před nulou. */
+function posledniVubec() {
+  if (STAV) {
+    const b = [...STAV.bloky].reverse().find(x => x.hotove.length);
+    if (b) return b.hotove[b.hotove.length - 1];
+  }
+  const h = historie();
+  for (let i = h.length - 1; i >= 0; i--) {
+    const s = h[i].serie || [];
+    if (s.length) return s[s.length - 1];
+  }
+  return null;
+}
+
+function cas(sekundy) {
+  const m = Math.floor(sekundy / 60), s = sekundy % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+/** Z "10-12" vezme spodní hranici, z "8-10 / nohu" taky. */
+function vychoziOpakovani(text) {
+  const m = String(text).match(/\d+/);
+  return m ? parseInt(m[0], 10) : 10;
+}
+
+/* ---------- Obrazovky ---------- */
+
+function obrazovkaStart() {
+  const jednotka = najdiJednotku();
+  const h = historie();
+  let planHtml;
+  if (!DATA.plan) {
+    planHtml = `<p class="dim small">Není načtený žádný plán — funguje režim podle nálady.</p>`;
+  } else if (jednotka) {
+    const dnesni = jednotka.datum === dnes();
+    planHtml = `<p class="dim small">${dnesni ? "Na dnešek" : "Nejbližší nesplněná jednotka z " + jednotka.datum}:
+      <strong>${jednotka.nazev}</strong> (${jednotka.bloky.length} bloků)</p>`;
+  } else {
+    planHtml = `<p class="dim small">V plánu už nezbývá nesplněná jednotka.</p>`;
+  }
+
+  app().innerHTML = `
+    <h1>AI trenér</h1>
+    <p class="dim small">${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum : "Zatím žádný odcvičený trénink."}</p>
+    <div class="karta">
+      <h2>Jdeme na to</h2>
+      ${planHtml}
+      <div class="mrizka">
+        <button class="hlavni" id="btn-plan" ${jednotka ? "" : "disabled"}>Trénink podle plánu</button>
+        <button class="stred" id="btn-nalada">Podle nálady — vyberu partii</button>
+      </div>
+    </div>
+    <div class="karta">
+      <h2 class="small">Data</h2>
+      <p class="dim small" id="stav-dat"></p>
+      ${podporujeSlozku ? `<div class="mrizka" style="margin-bottom:10px">
+        <button class="stred" id="btn-slozka">${slozka ? "Připojená složka: " + slozka.name + " — změnit"
+                                         : "Připojit složku dat"}</button></div>` : ""}
+      <button class="stred" id="btn-slozka-vstup">Načíst složku s daty</button>
+      <input type="file" id="soubor" multiple webkitdirectory
+             accept=".json,.jpg,.jpeg,.png,.webp" style="display:none">
+      <div class="mrizka" style="margin-top:10px">
+        <button class="small stred" id="btn-export">Exportovat historii (${h.length})</button>
+      </div>
+      ${(() => {
+        const a = [...new Set(DATA.cviky.filter(c => c.obrazek_zdroj)
+                     .map(c => c.obrazek_zdroj.autor))].sort();
+        return a.length ? `<p class="dim small" style="margin:10px 0 0">Obrázky cviků:
+          ${a.join(", ")} — wger.de, CC-BY-SA 3.0. Ilustrační, ne návod.</p>` : "";
+      })()}
+    </div>`;
+
+  $("#stav-dat").textContent = `${DATA.cviky.length} cviků, ${DATA.sloty.length} slotů`
+    + (DATA.plan ? `, plán ${DATA.plan.plati_od} – ${DATA.plan.plati_do}` : ", bez plánu");
+  $("#btn-plan").onclick = () => { spustTrenink(jednotka); };
+  $("#btn-nalada").onclick = obrazovkaPartie;
+  $("#soubor").onchange = nactiSoubory;
+  $("#btn-slozka-vstup").onclick = () => $("#soubor").click();
+  $("#btn-export").onclick = exportHistorie;
+  if (podporujeSlozku) $("#btn-slozka").onclick = pripojSlozku;
+}
+
+/** Jednotka na dnešek; když pro dnešek nic není, nejbližší neodcvičená. */
+function najdiJednotku() {
+  if (!DATA.plan) return null;
+  const hotove = new Set(historie().map(h => h.datum));
+  const d = dnes();
+  return DATA.plan.jednotky.find(j => j.datum === d && !hotove.has(j.datum))
+      || DATA.plan.jednotky.find(j => j.datum <= d && !hotove.has(j.datum))
+      || DATA.plan.jednotky.find(j => !hotove.has(j.datum))
+      || null;
+}
+
+/** Bloky pro partii ze šablon. Používá se při startu i při přidávání během tréninku. */
+function blokyProPartii(p, odPoradi) {
+  const volby = {};
+  DATA.cviky.forEach(c => c.sloty.forEach(sl => { (volby[sl] = volby[sl] || []).push(c.id); }));
+  return (DATA.sablony.podle_nalady[p] || []).map((x, i) => ({
+    poradi: odPoradi + i + 1, slot: x.slot, serie: x.serie, opakovani: x.opakovani,
+    rezerva: x.rezerva, pauza_s: x.pauza_s, volby: volby[x.slot] || []
+  }));
+}
+
+const NAZVY_PARTII = { nohy: "Nohy", zada: "Záda", hrudnik: "Hrudník",
+                       ramena: "Ramena", paze: "Paže", stred: "Střed těla" };
+
+/** Přidání další partie k rozcvičenému tréninku. */
+function obrazovkaPridatPartii() {
+  const partie = Object.keys(DATA.sablony.podle_nalady);
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět na trénink</button>
+    <h1>Přidat partii</h1>
+    <p class="dim small">Bloky se přidají na konec, rozcvičené se nezmění.</p>
+    <div class="mrizka">
+      ${partie.map(p => `<button class="stred" data-p="${p}">${NAZVY_PARTII[p] || p}</button>`).join("")}
+    </div>`;
+  $("#btn-zpet").onclick = obrazovkaTrenink;
+  document.querySelectorAll("[data-p]").forEach(b => {
+    b.onclick = () => {
+      const nove = blokyProPartii(b.dataset.p, STAV.bloky.length);
+      nove.forEach(x => { STAV.bloky.push({ ...x, cvik: null, hotove: [] });
+                          STAV.nabidnute[x.slot] = x.volby; });
+      STAV.nazev += " + " + (NAZVY_PARTII[b.dataset.p] || b.dataset.p);
+      ulozDoUloziste(ULOZ.beh, STAV);
+      obrazovkaTrenink();
+    };
+  });
+}
+
+function obrazovkaPartie() {
+  const partie = Object.keys(DATA.sablony.podle_nalady);
+  const vybrane = new Set();
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět</button>
+    <h1>Na co dneska?</h1>
+    <p class="dim small">Můžeš vybrat víc partií. Další se dá přidat i během tréninku.</p>
+    <div class="mrizka">
+      ${partie.map(p => `<button class="stred" data-p="${p}">${NAZVY_PARTII[p] || p}</button>`).join("")}
+    </div>
+    <button class="hlavni" id="btn-start" style="margin-top:14px" disabled>Začít</button>`;
+  $("#btn-zpet").onclick = obrazovkaStart;
+  const start = $("#btn-start");
+  document.querySelectorAll("[data-p]").forEach(b => {
+    b.onclick = () => {
+      const p = b.dataset.p;
+      vybrane.has(p) ? vybrane.delete(p) : vybrane.add(p);
+      b.classList.toggle("hlavni", vybrane.has(p));
+      start.disabled = vybrane.size === 0;
+      start.textContent = vybrane.size
+        ? "Začít — " + [...vybrane].map(x => NAZVY_PARTII[x] || x).join(" + ") : "Začít";
+    };
+  });
+  start.onclick = () => {
+    const bloky = [];
+    [...vybrane].forEach(p => bloky.push(...blokyProPartii(p, bloky.length)));
+    spustTrenink({ datum: dnes(), typ: "nálada:" + [...vybrane].join("+"),
+                   nazev: [...vybrane].map(x => NAZVY_PARTII[x] || x).join(" + "), bloky });
+  };
+}
+
+function spustTrenink(jednotka) {
+  STAV = {
+    schema: 1, datum: dnes(), typ: jednotka.typ, nazev: jednotka.nazev,
+    zacatek: new Date().toTimeString().slice(0, 5),
+    bloky: jednotka.bloky.map(b => ({ ...b, cvik: null, hotove: [] })),
+    nabidnute: Object.fromEntries(jednotka.bloky.map(b => [b.slot, b.volby]))
+  };
+  ulozDoUloziste(ULOZ.beh, STAV);
+  obrazovkaTrenink();
+}
+
+function obrazovkaTrenink() {
+  const b = STAV.bloky;
+  const nadalsi = b.findIndex(x => x.hotove.length < x.serie && !x.volitelne);
+  const naRade = nadalsi >= 0 ? nadalsi : b.findIndex(x => x.hotove.length < x.serie);
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← Ukončit trénink</button>
+    <h1>${STAV.nazev}</h1>
+    ${naRade >= 0 ? `<button class="hlavni" id="btn-dalsi" style="margin-bottom:12px">
+        Pokračovat: ${slotNazev(b[naRade].slot)} —
+        ${b[naRade].cvik ? cvik(b[naRade].cvik).nazev : cvik(b[naRade].volby[0]).nazev}
+      </button>` : `<p class="small">Všechno odcvičeno. Ukonči a ulož.</p>`}
+    <div id="bloky"></div>
+    <div class="mrizka" style="margin-top:14px">
+      <button class="stred" id="btn-pridat">+ Přidat partii</button>
+      <button class="hlavni" id="btn-konec">Ukončit a uložit</button>
+    </div>`;
+  if (naRade >= 0) $("#btn-dalsi").onclick = () => obrazovkaBlok(naRade);
+  $("#btn-pridat").onclick = obrazovkaPridatPartii;
+  $("#btn-zpet").onclick = obrazovkaUkoncit;
+  $("#btn-konec").onclick = obrazovkaKonec;
+
+  const cil = $("#bloky");
+  b.forEach((blok, i) => {
+    const hotovo = blok.hotove.length >= blok.serie;
+    const div = document.createElement("div");
+    div.className = "karta" + (hotovo ? " hotovo" : "");
+    if (i === naRade) div.style.borderColor = "var(--akce)";
+    div.innerHTML = `
+      <div class="radek">
+        <div><strong>${blok.poradi}. ${slotNazev(blok.slot)}</strong>
+          ${blok.volitelne ? '<span class="znacka">volitelné</span>' : ""}</div>
+        <div style="flex:none" class="dim small">${blok.serie} × ${blok.opakovani} · rezerva ${blok.rezerva}</div>
+      </div>
+      <div style="font-weight:600;margin-top:2px">${cvik(blok.cvik || blok.volby[0]).nazev}</div>
+      ${(() => {
+        // Alternativy rovnou pod cvikem — když je stroj obsazený, jde přepnout
+        // jedním ťuknutím a nemusí se nikam proklikávat.
+        const jine = blok.volby.filter(v => v !== (blok.cvik || blok.volby[0]));
+        return jine.length ? `<div class="nahrady-popis">nebo</div>
+          <div class="nahrady">${jine.map(v =>
+            `<button class="nahrada" data-nahrada="${v}" data-blok="${i}"
+               title="${cvik(v).nazev}">${cvik(v).nazev}</button>`
+          ).join("")}</div>` : "";
+      })()}
+      <div class="serie-tecky">${Array.from({ length: blok.serie }, (_, s) =>
+        `<div class="tecka ${blok.hotove[s] ? "ok" : ""}">${blok.hotove[s] ? blok.hotove[s].vaha_kg : s + 1}</div>`).join("")}</div>`;
+    div.onclick = (e) => {
+      const n = e.target.closest("[data-nahrada]");
+      if (n) {                      // ťuknutí na náhradu rovnou přepne cvik
+        blok.cvik = n.dataset.nahrada;
+        ulozDoUloziste(ULOZ.beh, STAV);
+        obrazovkaBlok(i);
+        return;
+      }
+      obrazovkaBlok(i);
+    };
+    cil.appendChild(div);
+  });
+}
+
+function obrazovkaBlok(i) {
+  const blok = STAV.bloky[i];
+  // Hlavní cvik je předvybraný — appka říká, co cvičit. Výběr z alternativ
+  // je až pro případ, že je stroj obsazený (tlačítko „Vybrat jiný cvik").
+  if (!blok.cvik) {
+    blok.cvik = blok.volby[0];
+    ulozDoUloziste(ULOZ.beh, STAV);
+  }
+  const c = cvik(blok.cvik);
+  const p = posledni(c.id);
+  const posledniVBloku = blok.hotove[blok.hotove.length - 1] || null;
+  const dalsiSerie = blok.hotove.length + 1;
+
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět na bloky</button>
+    <h1>${c.nazev}</h1>
+    <p class="dim small">${slotNazev(blok.slot)} · série ${Math.min(dalsiSerie, blok.serie)} z ${blok.serie}
+      · cíl ${blok.opakovani} opakování, rezerva ${blok.rezerva}</p>
+    ${posledniVBloku
+        ? `<p class="small">Předchozí série dneska: <strong>${posledniVBloku.vaha_kg}&nbsp;kg × ${posledniVBloku.opakovani}</strong>, rezerva ${posledniVBloku.rezerva}</p>`
+        : p ? `<p class="small">Naposledy ${p.datum}: <strong>${p.vaha}&nbsp;kg × ${p.op}</strong></p>`
+            : `<p class="small dim">Tenhle cvik ještě nemáš zapsaný — první série je odhad.</p>`}
+    <p class="small dim" id="odkud"></p>
+
+    <div class="karta">
+      <div class="small dim">Váha (kg)</div>
+      <div class="stepper">
+        <button data-krok="-2.5" data-pole="vaha">−</button>
+        <div class="hodnota" id="v-vaha">0</div>
+        <button data-krok="2.5" data-pole="vaha">+</button>
+      </div>
+      <div class="small dim" style="margin-top:10px">Opakování</div>
+      <div class="stepper">
+        <button data-krok="-1" data-pole="op">−</button>
+        <div class="hodnota" id="v-op">0</div>
+        <button data-krok="1" data-pole="op">+</button>
+      </div>
+      <div class="small dim" style="margin-top:10px">Rezerva do selhání</div>
+      <div class="stepper">
+        <button data-krok="-1" data-pole="rez">−</button>
+        <div class="hodnota" id="v-rez">0</div>
+        <button data-krok="1" data-pole="rez">+</button>
+      </div>
+      <button class="hlavni" id="btn-serie" style="margin-top:12px">Zapsat sérii</button>
+    </div>
+
+    <div class="karta">
+      ${c.obrazek ? `<img src="${c.obrazek}" alt="${c.nazev}"
+           style="width:100%;border-radius:10px;background:var(--bg)">
+        ${c.obrazek_poznamka ? `<p class="small varuj" style="margin:6px 0 0">${c.obrazek_poznamka}</p>` : ""}
+        <p class="dim small" style="margin:4px 0 10px">Ilustrační obrázek${
+          c.obrazek_zdroj ? ` · ${c.obrazek_zdroj.autor}, ${c.obrazek_zdroj.licence}, wger.de` : ""}.
+          Platí, co je napsané níž.</p>` : ""}
+      <h2 class="small">Jak se to dělá</h2>
+      <ul>${c.provedeni.map(x => `<li>${x}</li>`).join("")}</ul>
+      ${c.chyby ? `<div class="small dim">Časté chyby: ${c.chyby.join(", ")}.</div>` : ""}
+      ${c.dech ? `<div class="small dim">Dech: ${c.dech}.</div>` : ""}
+      ${c.pozor ? `<div class="small varuj" style="margin-top:6px">${c.pozor}</div>` : ""}
+      ${c.tip ? `<div class="small dim" style="margin-top:6px">${c.tip}</div>` : ""}
+    </div>
+    <button class="stred" id="btn-zmena">Vybrat jiný cvik</button>
+    <div id="pauza-misto"></div>`;
+
+  // Nikdy nezačínat od nuly. Bere se první, co je po ruce:
+  // 1) předchozí série v tomhle bloku, 2) tenhle cvik z historie,
+  // 3) jiný cvik ze stejného slotu, 4) úplně poslední zápis.
+  const naves = posledniVeSlotu(blok.slot, c.id);
+  const posl = posledniVubec();
+  const hodnoty = posledniVBloku
+    ? { vaha: posledniVBloku.vaha_kg, op: posledniVBloku.opakovani, rez: posledniVBloku.rezerva }
+    : p ? { vaha: p.vaha, op: p.op, rez: vychoziOpakovani(blok.rezerva) }
+      : naves ? { vaha: naves.vaha_kg, op: naves.opakovani, rez: naves.rezerva }
+        : posl ? { vaha: posl.vaha_kg, op: vychoziOpakovani(blok.opakovani), rez: vychoziOpakovani(blok.rezerva) }
+          : { vaha: 0, op: vychoziOpakovani(blok.opakovani), rez: vychoziOpakovani(blok.rezerva) };
+  const odkud = posledniVBloku ? "" : p ? "" 
+    : naves ? `Výchozí váha je z cviku „${cvik(naves.cvik).nazev}" — uprav podle sebe.`
+      : posl ? "Výchozí váha je z posledního zápisu — uprav podle sebe." : "";
+  const prekresli = () => {
+    $("#v-vaha").textContent = hodnoty.vaha;
+    $("#v-op").textContent = hodnoty.op;
+    $("#v-rez").textContent = hodnoty.rez;
+  };
+  prekresli();
+  if (odkud) $("#odkud").textContent = odkud;
+  document.querySelectorAll("[data-krok]").forEach(b => {
+    b.onclick = () => {
+      const pole = b.dataset.pole, krok = parseFloat(b.dataset.krok);
+      hodnoty[pole] = Math.max(0, Math.round((hodnoty[pole] + krok) * 10) / 10);
+      prekresli();
+    };
+  });
+  // Velký skok se neklikká — ťukni na číslo a napiš ho.
+  [["v-vaha", "vaha", "Váha v kg"], ["v-op", "op", "Opakování"],
+   ["v-rez", "rez", "Rezerva do selhání"]].forEach(([id, pole, popisek]) => {
+    const el = $("#" + id);
+    el.style.cursor = "pointer";
+    el.title = "Ťukni a napiš hodnotu";
+    el.onclick = () => {
+      const zadano = prompt(popisek + ":", String(hodnoty[pole]).replace(".", ","));
+      if (zadano === null) return;
+      const cislo = parseFloat(zadano.replace(",", "."));
+      if (isNaN(cislo) || cislo < 0) { alert("To není číslo."); return; }
+      hodnoty[pole] = Math.round(cislo * 10) / 10;
+      prekresli();
+    };
+  });
+  $("#btn-zpet").onclick = obrazovkaTrenink;
+  $("#btn-zmena").onclick = () => obrazovkaVyberCviku(i);
+  $("#btn-serie").onclick = () => {
+    blok.hotove.push({ serie: blok.hotove.length + 1, vaha_kg: hodnoty.vaha,
+                       opakovani: hodnoty.op, rezerva: hodnoty.rez });
+    ulozDoUloziste(ULOZ.beh, STAV);
+    if (blok.hotove.length >= blok.serie) { obrazovkaTrenink(); return; }
+    spustPauzu(blok.pauza_s, () => obrazovkaBlok(i));
+  };
+}
+
+function spustPauzu(sekundy, potom) {
+  let zbyva = sekundy;
+  const misto = $("#pauza-misto");
+  misto.innerHTML = `<div class="pauza" id="odpocet"></div>`;
+  const el = $("#odpocet");
+  const tik = () => {
+    el.textContent = zbyva > 0 ? `Pauza ${cas(zbyva)} — ťukni pro přeskočení` : "Jedeme dál";
+    if (zbyva-- <= 0) { clearInterval(t); potom(); }
+  };
+  tik();
+  const t = setInterval(tik, 1000);
+  el.onclick = () => { clearInterval(t); potom(); };
+}
+
+function obrazovkaVyberCviku(i) {
+  const blok = STAV.bloky[i];
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět na bloky</button>
+    <h1>${slotNazev(blok.slot)}</h1>
+    <p class="dim small">Všechny volby jsou rovnocenné. Vyber, co je volné —
+      na nic se nečeká.</p>
+    <div class="mrizka">
+      ${blok.volby.map(id => {
+        const c = cvik(id), p = posledni(id);
+        return `<button data-cvik="${id}" style="display:flex;gap:12px;align-items:center">
+          ${c.obrazek ? `<img src="${c.obrazek}" alt="" style="width:64px;height:64px;
+             object-fit:cover;border-radius:8px;flex:none;background:var(--bg)">` : ""}
+          <span style="flex:1">
+            <span style="display:block"><strong>${c.nazev}</strong></span>
+            <span class="dim small">${c.typ}${p ? ` · naposledy ${p.vaha} kg × ${p.op}` : ""}</span>
+          </span>
+        </button>`;
+      }).join("")}
+    </div>`;
+  $("#btn-zpet").onclick = obrazovkaTrenink;
+  document.querySelectorAll("[data-cvik]").forEach(b => {
+    b.onclick = () => { blok.cvik = b.dataset.cvik; ulozDoUloziste(ULOZ.beh, STAV); obrazovkaBlok(i); };
+  });
+}
+
+/** Ukončení tréninku. Když nic není zapsané, jde se rovnou na start.
+    Když je, musí se rozhodnout — zahozená data se nedají vrátit.
+    Schválně bez nativního confirm(): ten jde zavřít a pak to vypadá,
+    že tlačítko nefunguje. */
+function obrazovkaUkoncit() {
+  const zapsano = STAV.bloky.reduce((n, b) => n + b.hotove.length, 0);
+  if (!zapsano) {
+    STAV = null;
+    try { localStorage.removeItem(ULOZ.beh); } catch (e) {}
+    obrazovkaStart();
+    return;
+  }
+  app().innerHTML = `
+    <h1>Ukončit trénink</h1>
+    <p>Máš zapsáno <strong>${zapsano} ${mnozne(zapsano, "sérii", "série", "sérií")}</strong>
+      v ${STAV.bloky.filter(b => b.hotove.length).length} ${
+      mnozne(STAV.bloky.filter(b => b.hotove.length).length, "bloku", "blocích", "blocích")}.
+      Co s nimi?</p>
+    <div class="mrizka">
+      <button class="hlavni" id="u-ulozit">Uložit trénink</button>
+      <button class="stred" id="u-zpet">Pokračovat v tréninku</button>
+      <button class="stred" id="u-zahodit">Zahodit bez uložení</button>
+    </div>`;
+  $("#u-ulozit").onclick = obrazovkaKonec;
+  $("#u-zpet").onclick = obrazovkaTrenink;
+  let potvrzeno = false;
+  $("#u-zahodit").onclick = (e) => {
+    if (!potvrzeno) {              // druhé ťuknutí místo dialogu
+      potvrzeno = true;
+      e.target.textContent = "Opravdu zahodit? Ťukni znovu";
+      e.target.classList.add("varuj");
+      return;
+    }
+    STAV = null;
+    try { localStorage.removeItem(ULOZ.beh); } catch (e2) {}
+    obrazovkaStart();
+  };
+}
+
+function obrazovkaKonec() {
+  const serie = STAV.bloky.filter(b => b.cvik).flatMap(b =>
+    b.hotove.map(h => ({ poradi: b.poradi, slot: b.slot, cvik: b.cvik, ...h })));
+  app().innerHTML = `
+    <h1>Hotovo</h1>
+    <p class="dim small">${serie.length} ${mnozne(serie.length, "série", "série", "sérií")}
+      · ${(() => { const n = STAV.bloky.filter(b => b.hotove.length).length;
+                   return n + " " + mnozne(n, "blok", "bloky", "bloků"); })()}</p>
+    <div class="karta">
+      <div class="small dim">Prostředí</div>
+      <div class="radek" id="v-prostredi">
+        <button data-v="ok">ok</button><button data-v="dusno">dusno</button>
+      </div>
+      <div class="small dim" style="margin-top:10px">Energie</div>
+      <div class="radek" id="v-energie">
+        <button data-v="dobrá">dobrá</button><button data-v="střední">střední</button><button data-v="slabá">slabá</button>
+      </div>
+    </div>
+    <button class="hlavni" id="btn-uloz">Uložit trénink</button>
+    <button id="btn-zpet" style="margin-top:8px">← zpět</button>`;
+
+  const vybrano = { prostredi: "ok", energie: "dobrá" };
+  ["prostredi", "energie"].forEach(pole => {
+    const box = $("#v-" + pole);
+    const oznac = () => box.querySelectorAll("button").forEach(b =>
+      b.classList.toggle("hlavni", b.dataset.v === vybrano[pole]));
+    box.querySelectorAll("button").forEach(b => {
+      b.onclick = () => { vybrano[pole] = b.dataset.v; oznac(); };
+    });
+    oznac();
+  });
+
+  $("#btn-zpet").onclick = obrazovkaTrenink;
+  $("#btn-uloz").onclick = async () => {
+    const zaznam = {
+      schema: 1, datum: STAV.datum, typ: STAV.typ, nazev: STAV.nazev,
+      zacatek: STAV.zacatek, konec: new Date().toTimeString().slice(0, 5),
+      prostredi: vybrano.prostredi, energie: vybrano.energie,
+      serie, nabidnute: STAV.nabidnute
+    };
+    const h = historie(); h.push(zaznam);
+    const ok = ulozDoUloziste(ULOZ.historie, h);
+    try { localStorage.removeItem(ULOZ.beh); } catch (e) {}
+    STAV = null;
+    const doSlozky = await zapisDoSlozky(zaznam);
+    obrazovkaStart();
+    if (doSlozky) {
+      const p = document.createElement("p");
+      p.className = "small";
+      p.textContent = `Zapsáno do složky: historie/${doSlozky}. Na Macu pak spusť ./import.sh.`;
+      app().appendChild(p);
+      if (ok) return;
+    } else {
+      stahni(zaznam, `trenink-${zaznam.datum}.json`);
+    }
+    if (!ok) {
+      const v = document.createElement("p");
+      v.className = "small varuj";
+      v.textContent = "Prohlížeč nepovolil uložení historie. Zkopíruj si text níž, jinak o trénink přijdeš.";
+      app().appendChild(v);
+    }
+    ukazText(zaznam, `trenink-${zaznam.datum}.json`);
+  };
+}
+
+/* ---------- Soubory ---------- */
+function stahni(objekt, jmeno) {
+  const blob = new Blob([JSON.stringify(objekt, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = jmeno;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function exportHistorie() {
+  const h = historie();
+  if (!h.length) { alert("Historie je prázdná."); return; }
+  stahni(h, `historie-${dnes()}.json`);
+  ukazText(h, `historie-${dnes()}.json`);
+}
+
+/** Záchrana, když prohlížeč stahování nepovolí (sandbox, in-app prohlížeč).
+    Text jde zkopírovat a poslat kamkoliv — pak ho zpracuje ./import.sh. */
+function ukazText(objekt, jmeno) {
+  const text = JSON.stringify(objekt, null, 2);
+  const box = document.createElement("div");
+  box.className = "karta";
+  box.innerHTML = `<h2 class="small">${jmeno}</h2>
+    <p class="dim small">Když se soubor nestáhl, zkopíruj text a pošli ho.</p>
+    <textarea readonly style="width:100%;height:140px;font:12px ui-monospace,monospace;
+      background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;
+      padding:8px"></textarea>
+    <button class="hlavni" style="margin-top:8px">Zkopírovat</button>`;
+  box.querySelector("textarea").value = text;
+  box.querySelector("button").onclick = async (e) => {
+    try { await navigator.clipboard.writeText(text); e.target.textContent = "Zkopírováno"; }
+    catch (err) { box.querySelector("textarea").select(); e.target.textContent = "Vyber a zkopíruj ručně"; }
+  };
+  app().appendChild(box);
+  box.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+/** Načte celou složku dat najednou — cviky, šablony, plán i obrázky.
+    Prohlížeč vrátí prostý seznam souborů, rozdělují se podle názvu.
+    Na iOS `webkitdirectory` nefunguje, tam se vyberou soubory ručně —
+    proto je vstup zároveň `multiple`. */
+async function nactiSoubory(e) {
+  const soubory = [...e.target.files];
+  if (!soubory.length) return;
+  const nactene = [];
+  const obrazky = {};
+
+  const text = (f) => f.text ? f.text() : new Promise(ok => {
+    const r = new FileReader(); r.onload = () => ok(r.result); r.readAsText(f);
+  });
+  const dataUrl = (f) => new Promise(ok => {
+    const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f);
+  });
+
+  for (const f of soubory) {
+    const jmeno = f.name.toLowerCase();
+    try {
+      if (jmeno.endsWith(".json")) {
+        const j = JSON.parse(await text(f));
+        if (j.cviky && j.sloty) { DATA.cviky = j.cviky; DATA.sloty = j.sloty; nactene.push("cviky"); }
+        else if (j.jednotky) { DATA.plan = j; nactene.push("plán"); }
+        else if (j.podle_nalady) { DATA.sablony = j; nactene.push("šablony"); }
+      } else if (/\.(jpe?g|png|webp)$/.test(jmeno)) {
+        obrazky[f.name.replace(/\.[^.]+$/, "")] = await dataUrl(f);
+      }
+    } catch (err) { /* jeden pokažený soubor nesmí shodit zbytek */ }
+  }
+
+  let pocet = 0;
+  DATA.cviky.forEach(c => { if (obrazky[c.id]) { c.obrazek = obrazky[c.id]; pocet++; } });
+  if (pocet) nactene.push(pocet + " " + mnozne(pocet, "obrázek", "obrázky", "obrázků"));
+
+  if (!nactene.length) {
+    alert("Ve složce nejsou data, která bych poznal.\n"
+        + "Čekám cviky.json, sablony.json, aktualni.json a obrázky.");
+    return;
+  }
+
+  // Obrázky jsou velké. Když se sada do prohlížeče nevejde, uloží se bez nich
+  // a po restartu se složka musí načíst znovu.
+  if (!ulozDoUloziste(ULOZ.data, DATA)) {
+    const bezObrazku = { ...DATA, cviky: DATA.cviky.map(c => {
+      const k = { ...c };
+      if (String(k.obrazek || "").startsWith("data:")) delete k.obrazek;
+      return k;
+    }) };
+    ulozDoUloziste(ULOZ.data, bezObrazku);
+  }
+  obrazovkaStart();
+  const p = document.createElement("p");
+  p.className = "small";
+  p.textContent = "Načteno ze složky: " + nactene.join(", ") + ".";
+  app().appendChild(p);
+}
+
+/* ---------- Start ---------- */
+(async function () {
+  // Dřív připojená složka: když povolení pořád platí, načte se sama.
+  // Když ne, prohlížeč vyžaduje kliknutí — pak se jen ukáže tlačítko.
+  if (podporujeSlozku) {
+    const ulozena = await nactiUlozenouSlozku();
+    if (ulozena) {
+      try {
+        if (await ulozena.queryPermission({ mode: "readwrite" }) === "granted") {
+          slozka = ulozena;
+          DATA = await nactiZeSlozky(ulozena);
+          ulozDoUloziste(ULOZ.data, DATA);
+        }
+      } catch (e) { /* složka zmizela nebo se přejmenovala — jede se dál bez ní */ }
+    }
+  }
+  if (!DATA) DATA = await nactiData();
+  if (!DATA || !DATA.cviky) {
+    app().innerHTML = `<h1>AI trenér</h1>
+      <div class="karta"><p>Chybí data. Načti <code>cviky.json</code>.</p>
+      <button class="stred" id="btn-slozka-vstup">Načíst složku s daty</button>
+      <input type="file" id="soubor" multiple webkitdirectory
+             accept=".json,.jpg,.jpeg,.png,.webp" style="display:none"></div>`;
+    DATA = DATA || { cviky: [], sloty: [], sablony: { podle_nalady: {} }, plan: null };
+    $("#soubor").onchange = nactiSoubory;
+    $("#btn-slozka-vstup").onclick = () => $("#soubor").click();
+    return;
+  }
+  const beh = nactiZUloziste(ULOZ.beh);
+  if (beh && beh.datum === dnes() && confirm("Máš rozcvičený trénink z dneška. Pokračovat?")) {
+    STAV = beh; obrazovkaTrenink(); return;
+  }
+  obrazovkaStart();
+})();
+</script>
+</body>
+</html>

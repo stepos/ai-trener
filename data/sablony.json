@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "zdroj": "ukázková sada — full body A/B, 3× týdně",
+  "aktualizovano": "2026-09-04",
+  "jednotky": {
+    "A": {
+      "nazev": "Full body A",
+      "bloky": [
+        {
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 165
+        },
+        {
+          "slot": "hrudnik",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "hamstringy",
+          "serie": 3,
+          "opakovani": "12",
+          "rezerva": "2-3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "zada-sirka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "ramena-bocni",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 90
+        },
+        {
+          "slot": "triceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90
+        },
+        {
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "20 m",
+          "rezerva": "4",
+          "pauza_s": 120,
+          "volitelne": true
+        }
+      ]
+    },
+    "B": {
+      "nazev": "Full body B",
+      "bloky": [
+        {
+          "slot": "nohy-funkcne",
+          "serie": 3,
+          "opakovani": "8-10 / nohu",
+          "rezerva": "3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "zada-tloustka",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "2-3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "kvadricepsy",
+          "serie": 3,
+          "opakovani": "12-15",
+          "rezerva": "2-3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "ramena-tlak",
+          "serie": 3,
+          "opakovani": "10-12",
+          "rezerva": "3",
+          "pauza_s": 120
+        },
+        {
+          "slot": "biceps",
+          "serie": 3,
+          "opakovani": "10-15",
+          "rezerva": "2-3",
+          "pauza_s": 90
+        },
+        {
+          "slot": "stred-tela",
+          "serie": 3,
+          "opakovani": "10 / stranu",
+          "rezerva": "3",
+          "pauza_s": 90
+        }
+      ]
+    }
+  },
+  "podle_nalady": {
+    "nohy": [
+      {
+        "slot": "kvadricepsy",
+        "serie": 3,
+        "opakovani": "10-12",
+        "rezerva": "3",
+        "pauza_s": 165
+      },
+      {
+        "slot": "hamstringy",
+        "serie": 3,
+        "opakovani": "12",
+        "rezerva": "2-3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "nohy-funkcne",
+        "serie": 3,
+        "opakovani": "8-10 / nohu",
+        "rezerva": "3",
+        "pauza_s": 120
+      }
+    ],
+    "zada": [
+      {
+        "slot": "zada-sirka",
+        "serie": 3,
+        "opakovani": "10-12",
+        "rezerva": "2-3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "zada-tloustka",
+        "serie": 3,
+        "opakovani": "10-12",
+        "rezerva": "2-3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "ramena-zadni",
+        "serie": 3,
+        "opakovani": "12-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      }
+    ],
+    "hrudnik": [
+      {
+        "slot": "hrudnik",
+        "serie": 4,
+        "opakovani": "10-12",
+        "rezerva": "2-3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "ramena-tlak",
+        "serie": 3,
+        "opakovani": "10-12",
+        "rezerva": "3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "triceps",
+        "serie": 3,
+        "opakovani": "10-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      }
+    ],
+    "ramena": [
+      {
+        "slot": "ramena-tlak",
+        "serie": 3,
+        "opakovani": "10-12",
+        "rezerva": "3",
+        "pauza_s": 120
+      },
+      {
+        "slot": "ramena-bocni",
+        "serie": 3,
+        "opakovani": "12-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      },
+      {
+        "slot": "ramena-zadni",
+        "serie": 3,
+        "opakovani": "12-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      }
+    ],
+    "paze": [
+      {
+        "slot": "biceps",
+        "serie": 3,
+        "opakovani": "10-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      },
+      {
+        "slot": "triceps",
+        "serie": 3,
+        "opakovani": "10-15",
+        "rezerva": "2-3",
+        "pauza_s": 90
+      }
+    ],
+    "stred": [
+      {
+        "slot": "stred-tela",
+        "serie": 3,
+        "opakovani": "10 / stranu",
+        "rezerva": "3",
+        "pauza_s": 90
+      }
+    ]
+  }
+}
