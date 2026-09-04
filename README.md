@@ -18,16 +18,17 @@ souborů, provede tě tréninkem a zapíše, co jsi odcvičil.
 - **U cviku je popsané provedení**, časté chyby a dech.
 - Historie zůstává v prohlížeči, dá se vyexportovat jako JSON.
 
-## Vyzkoušet
+## V repu nejsou žádná data
 
-Otevři `index.html`, nebo si stáhni `dist/ai-trener.html` — to je celá
-aplikace i s daty v jednom souboru, který jde poslat mailem a otevřít offline.
+Aplikace je **prázdná slupka**. Neobsahuje jediný cvik ani plán — všechno si
+načte z tvojí složky, kterou vybereš při prvním spuštění. Data zůstávají u tebe,
+nikam se neposílají a nic se nikam nepřihlašuje.
 
-## Vlastní data
+Je to schválně: tréninkový plán je věc, která má odpovídat konkrétnímu člověku,
+jeho zdraví a cílům. Sdílený „univerzální" plán by byl v lepším případě
+k ničemu, v horším škodlivý.
 
-V repu je ukázková sada: 44 cviků ve 12 slotech, full body A/B třikrát týdně.
-**Vem ji jako příklad, ne jako doporučení** — série, opakování a výběr cviků
-si nastav podle sebe, ideálně s někým, kdo tvoje tělo zná.
+## Co potřebuje ve složce
 
 Tři soubory:
 
@@ -35,19 +36,67 @@ Tři soubory:
 |---|---|
 | `data/cviky.json` | cviky, jejich provedení a sloty (partie) |
 | `data/sablony.json` | jednotky A/B a šablony pro trénink podle nálady |
-| `data/plany/aktualni.json` | vygenerovaný plán s datumy — čte ho aplikace |
+| `plany/aktualni.json` | vygenerovaný plán s datumy — podle nich se řídí |
 
-Plán se generuje ze šablon, cviky do něj nepatří — každý blok nese jen slot
-a k němu seznam rovnocenných voleb:
+### `cviky.json`
 
-```bash
-./generuj-plan.sh mesic      # 28 dní, střídá A a B, drží 48 h mezi tréninky
-./kontrola-plan.sh           # ověří, že plán sedí na databázi cviků
-./build-app.sh               # dist/ai-trener.html — jeden soubor i s daty
+```json
+{
+  "schema": 1,
+  "sloty": [ { "id": "kvadricepsy", "nazev": "Kvadricepsy", "partie": "nohy" } ],
+  "cviky": [
+    {
+      "id": "leg-press",
+      "nazev": "Leg press",
+      "sloty": ["kvadricepsy"],
+      "typ": "stroj",
+      "provedeni": ["Záda opřená o opěrku.", "Kolena nepropínat."],
+      "chyby": ["odlepení kříže od opěrky"],
+      "dech": "výdech při tlaku"
+    }
+  ]
+}
 ```
 
-Obrázky ke cvikům jsou nepovinné: ulož obrázek do `data/obrazky/` pod
-názvem cviku (`leg-press.jpg`) a spusť `./obrazky.sh`.
+### `plany/aktualni.json`
+
+Blok neurčuje cvik, ale **slot** a k němu 3–4 rovnocenné volby. Proto obsazený
+stroj nezdrží — ťukneš na náhradu a jedeš dál.
+
+```json
+{
+  "schema": 1,
+  "jednotky": [
+    {
+      "datum": "2026-09-05",
+      "typ": "A",
+      "nazev": "Full body A",
+      "bloky": [
+        { "poradi": 1, "slot": "kvadricepsy", "serie": 3, "opakovani": "10-12",
+          "rezerva": "3", "pauza_s": 165,
+          "volby": ["leg-press", "hack-drep", "predkopavani"] }
+      ]
+    }
+  ]
+}
+```
+
+`sablony.json` má stejné bloky bez datumů — z nich se skládá trénink podle
+nálady a generuje plán.
+
+### Skripty
+
+Nepovinné. Když si soubory píšeš ručně, nepotřebuješ je.
+
+```bash
+./generuj-plan.sh mesic      # plán na 28 dní ze šablon, drží 48 h mezi tréninky
+./kontrola-plan.sh           # ověří, že plán sedí na databázi cviků
+./obrazky.sh                 # zapojí obrázky ze složky obrazky/
+./build-app.sh               # aplikace i s tvými daty v jednom souboru
+```
+
+Obrázky jsou nepovinné: ulož je do `obrazky/` pod názvem cviku
+(`leg-press.jpg`) a spusť `./obrazky.sh`.
 
 ## Jak je to postavené
 

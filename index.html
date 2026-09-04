@@ -837,13 +837,25 @@ async function nactiSoubory(e) {
   if (!DATA) DATA = await nactiData();
   if (!DATA || !DATA.cviky) {
     app().innerHTML = `<h1>AI trenér</h1>
-      <div class="karta"><p>Chybí data. Načti <code>cviky.json</code>.</p>
-      <button class="stred" id="btn-slozka-vstup">Načíst složku s daty</button>
-      <input type="file" id="soubor" multiple webkitdirectory
-             accept=".json,.jpg,.jpeg,.png,.webp" style="display:none"></div>`;
+      <p class="dim small">Aplikace vede trénink v posilovně. Sama o sobě je prázdná —
+        cviky, plán i obrázky si načte z tvojí složky s daty.</p>
+      <div class="karta">
+        <h2 class="small">Načti složku s daty</h2>
+        <p class="dim small">Ve složce se čekají soubory
+          <code>cviky.json</code>, <code>sablony.json</code> a
+          <code>plany/aktualni.json</code>. Obrázky jsou nepovinné.</p>
+        <button class="stred" id="btn-slozka-vstup">Vybrat složku</button>
+        <input type="file" id="soubor" multiple webkitdirectory
+               accept=".json,.jpg,.jpeg,.png,.webp" style="display:none">
+        ${podporujeSlozku ? `<div class="mrizka" style="margin-top:8px">
+          <button class="stred" id="btn-slozka">Připojit složku natrvalo (i pro zápis)</button>
+        </div>` : ""}
+      </div>
+      <p class="dim small">Jak mají soubory vypadat, je popsané v README repozitáře.</p>`;
     DATA = DATA || { cviky: [], sloty: [], sablony: { podle_nalady: {} }, plan: null };
     $("#soubor").onchange = nactiSoubory;
     $("#btn-slozka-vstup").onclick = () => $("#soubor").click();
+    if (podporujeSlozku) $("#btn-slozka").onclick = pripojSlozku;
     return;
   }
   const beh = nactiZUloziste(ULOZ.beh);
