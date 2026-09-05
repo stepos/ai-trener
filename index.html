@@ -100,6 +100,12 @@ async function nactiData() {
         fetch(zaklad + "sablony.json").then(r => r.json()),
         fetch(zaklad + "plany/aktualni.json").then(r => r.json()).catch(() => null)
       ]);
+      // Cesty k obrázkům jsou v datech zapsané vůči datové složce
+      // ("obrazky/leg-press.jpg"), ne vůči stránce — jinak by se nenačetly.
+      cviky.cviky.forEach(c => {
+        if (c.obrazek && !c.obrazek.startsWith("data:") && !c.obrazek.startsWith("http"))
+          c.obrazek = zaklad + c.obrazek;
+      });
       return { cviky: cviky.cviky, sloty: cviky.sloty, sablony: sablony, plan: plan };
     } catch (e) { /* zkusí se další cesta */ }
   }
@@ -514,9 +520,9 @@ function obrazovkaBlok(i) {
       ${c.obrazek ? `<img src="${c.obrazek}" alt="${c.nazev}"
            style="width:100%;border-radius:10px;background:var(--bg)">
         ${c.obrazek_poznamka ? `<p class="small varuj" style="margin:6px 0 0">${c.obrazek_poznamka}</p>` : ""}
-        <p class="dim small" style="margin:4px 0 10px">Ilustrační obrázek${
-          c.obrazek_zdroj ? ` · ${c.obrazek_zdroj.autor}, ${c.obrazek_zdroj.licence}, wger.de` : ""}.
-          Platí, co je napsané níž.</p>` : ""}
+        ${c.obrazek_zdroj ? `<p class="dim small" style="margin:4px 0 10px">Ilustrační obrázek ·
+          ${c.obrazek_zdroj.autor}, ${c.obrazek_zdroj.licence}, wger.de.
+          Platí, co je napsané níž.</p>` : `<div style="margin-bottom:10px"></div>`}` : ""}
       <h2 class="small">Jak se to dělá</h2>
       <ul>${c.provedeni.map(x => `<li>${x}</li>`).join("")}</ul>
       ${c.chyby ? `<div class="small dim">Časté chyby: ${c.chyby.join(", ")}.</div>` : ""}
