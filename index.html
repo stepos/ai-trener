@@ -41,6 +41,13 @@ button:active{transform:scale(.99)}
 .znacka{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:999px;
   background:var(--line);color:var(--dim)}
 .hotovo{opacity:.55}
+.hlavicka{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hlavicka h1{margin:0}
+.ikona{width:44px;height:44px;flex:none;padding:0;text-align:center;font-size:1.2rem;
+  border-radius:50%;line-height:1}
+.cesta{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;
+  background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0}
+.cislo{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
 .nahrady{margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:6px}
 .nahrady-popis{font-size:.8rem;color:var(--dim);margin-top:10px}
@@ -90,7 +97,9 @@ let DATA = null;     // { cviky, sloty, sablony, plan }
 let STAV = null;     // rozcvičený trénink
 
 async function nactiData() {
-  if (window.AI_TRENER_DATA) return window.AI_TRENER_DATA;
+  if (window.AI_TRENER_DATA) {
+    return { ...window.AI_TRENER_DATA, zdroj: { zpusob: "vestavena" } };
+  }
   // Aplikace může ležet ve složce app/ (repo posilovani) nebo v kořeni
   // (samostatné repo), proto se zkouší obě cesty.
   for (const zaklad of ["../data/", "data/"]) {
@@ -106,7 +115,9 @@ async function nactiData() {
         if (c.obrazek && !c.obrazek.startsWith("data:") && !c.obrazek.startsWith("http"))
           c.obrazek = zaklad + c.obrazek;
       });
-      return { cviky: cviky.cviky, sloty: cviky.sloty, sablony: sablony, plan: plan };
+      return { cviky: cviky.cviky, sloty: cviky.sloty, sablony: sablony, plan: plan,
+               zdroj: { nazev: new URL(zaklad, location.href).href,
+                        zpusob: "server", kdy: dnes() } };
     } catch (e) { /* zkusí se další cesta */ }
   }
   return nactiZUloziste(ULOZ.data);
@@ -196,8 +207,9 @@ async function pripojSlozku() {
     slozka = handle;
     await ulozSlozku(handle);
     DATA = nova;
+    DATA.zdroj = { nazev: handle.name, zpusob: "pripojena", kdy: dnes() };
     ulozDoUloziste(ULOZ.data, DATA);
-    obrazovkaStart();
+    obrazovkaNastaveni();
   } catch (e) {
     if (e && e.name === "AbortError") return;      // uživatel dialog zavřel
     alert("Složku se nepodařilo připojit: " + (e && e.message ? e.message : e));
@@ -281,8 +293,12 @@ function obrazovkaStart() {
   }
 
   app().innerHTML = `
-    <h1>AI trenér</h1>
-    <p class="dim small">${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum : "Zatím žádný odcvičený trénink."}</p>
+    <div class="hlavicka">
+      <h1>AI trenér</h1>
+      <button class="ikona" id="btn-nastaveni" title="Nastavení" aria-label="Nastavení">⚙</button>
+    </div>
+    <p class="dim small">${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum
+                                    : "Zatím žádný odcvičený trénink."}</p>
     <div class="karta">
       <h2>Jdeme na to</h2>
       ${planHtml}
@@ -290,31 +306,68 @@ function obrazovkaStart() {
         <button class="hlavni" id="btn-plan" ${jednotka ? "" : "disabled"}>Trénink podle plánu</button>
         <button class="stred" id="btn-nalada">Podle nálady — vyberu partii</button>
       </div>
-    </div>
-    <div class="karta">
-      <h2 class="small">Data</h2>
-      <p class="dim small" id="stav-dat"></p>
-      ${podporujeSlozku ? `<div class="mrizka" style="margin-bottom:10px">
-        <button class="stred" id="btn-slozka">${slozka ? "Připojená složka: " + slozka.name + " — změnit"
-                                         : "Připojit složku dat"}</button></div>` : ""}
-      <button class="stred" id="btn-slozka-vstup">Načíst složku s daty</button>
-      <input type="file" id="soubor" multiple webkitdirectory
-             accept=".json,.jpg,.jpeg,.png,.webp" style="display:none">
-      <div class="mrizka" style="margin-top:10px">
-        <button class="small stred" id="btn-export">Exportovat historii (${h.length})</button>
-      </div>
-      ${(() => {
-        const a = [...new Set(DATA.cviky.filter(c => c.obrazek_zdroj)
-                     .map(c => c.obrazek_zdroj.autor))].sort();
-        return a.length ? `<p class="dim small" style="margin:10px 0 0">Obrázky cviků:
-          ${a.join(", ")} — wger.de, CC-BY-SA 3.0. Ilustrační, ne návod.</p>` : "";
-      })()}
     </div>`;
 
-  $("#stav-dat").textContent = `${DATA.cviky.length} cviků, ${DATA.sloty.length} slotů`
-    + (DATA.plan ? `, plán ${DATA.plan.plati_od} – ${DATA.plan.plati_do}` : ", bez plánu");
   $("#btn-plan").onclick = () => { spustTrenink(jednotka); };
   $("#btn-nalada").onclick = obrazovkaPartie;
+  $("#btn-nastaveni").onclick = obrazovkaNastaveni;
+}
+
+/** Nastavení: odkud jsou data, co v nich je, a jak je vyměnit. */
+function obrazovkaNastaveni() {
+  const h = historie();
+  const z = DATA.zdroj || {};
+  const obrazku = DATA.cviky.filter(c => c.obrazek).length;
+  const autori = [...new Set(DATA.cviky.filter(c => c.obrazek_zdroj)
+                    .map(c => c.obrazek_zdroj.autor))].sort();
+
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět</button>
+    <h1>Nastavení</h1>
+
+    <div class="karta">
+      <h2 class="small">Složka s daty</h2>
+      <p class="cesta">${slozka ? slozka.name
+        : z.zpusob === "vestavena" ? "data jsou uvnitř tohoto souboru"
+        : (z.nazev || "žádná")}</p>
+      <p class="dim small">${
+          slozka ? "Připojená natrvalo — aplikace do ní umí i zapisovat odcvičené tréninky."
+        : z.zpusob === "nacteno" ? "Načtená kopie ve vaší paměti prohlížeče. Po vymazání dat prohlížeče se musí načíst znovu."
+        : z.zpusob === "server" ? "Staženo ze serveru, kde aplikace běží. Zapisovat tam nejde."
+        : "Aplikace běží nad daty, která má zabudovaná v sobě."}${
+          z.kdy ? " Naposledy " + z.kdy + "." : ""}</p>
+      <div class="mrizka" style="margin-top:10px">
+        ${podporujeSlozku ? `<button class="stred" id="btn-slozka">${
+          slozka ? "Připojit jinou složku" : "Připojit složku natrvalo"}</button>` : ""}
+        <button class="stred" id="btn-slozka-vstup">Načíst složku s daty</button>
+        <input type="file" id="soubor" multiple webkitdirectory
+               accept=".json,.jpg,.jpeg,.png,.webp" style="display:none">
+      </div>
+    </div>
+
+    <div class="karta">
+      <h2 class="small">Co je načtené</h2>
+      <table>
+        <tr><td>Cviky</td><td class="cislo">${DATA.cviky.length}</td></tr>
+        <tr><td>Sloty</td><td class="cislo">${DATA.sloty.length}</td></tr>
+        <tr><td>Obrázky</td><td class="cislo">${obrazku}</td></tr>
+        <tr><td>Plán</td><td class="cislo">${DATA.plan
+          ? DATA.plan.plati_od + " – " + DATA.plan.plati_do : "žádný"}</td></tr>
+        <tr><td>Odcvičeno</td><td class="cislo">${h.length}</td></tr>
+      </table>
+    </div>
+
+    <div class="karta">
+      <h2 class="small">Historie</h2>
+      <p class="dim small">Zůstává v tomhle prohlížeči. Export pošli do repa,
+        tam se z něj stanou řádky v tabulkách.</p>
+      <button class="stred" id="btn-export">Exportovat historii (${h.length})</button>
+    </div>
+
+    ${autori.length ? `<p class="dim small">Obrázky cviků: ${autori.join(", ")} —
+      wger.de, CC-BY-SA 3.0.</p>` : ""}`;
+
+  $("#btn-zpet").onclick = obrazovkaStart;
   $("#soubor").onchange = nactiSoubory;
   $("#btn-slozka-vstup").onclick = () => $("#soubor").click();
   $("#btn-export").onclick = exportHistorie;
@@ -775,6 +828,9 @@ async function nactiSoubory(e) {
   if (!soubory.length) return;
   const nactene = [];
   const obrazky = {};
+  // webkitRelativePath vypadá jako "Posilovaní - plany/plany/aktualni.json";
+  // celou cestu na disku prohlížeč z bezpečnostních důvodů nedá.
+  const korenSlozky = (soubory[0].webkitRelativePath || "").split("/")[0];
 
   const text = (f) => f.text ? f.text() : new Promise(ok => {
     const r = new FileReader(); r.onload = () => ok(r.result); r.readAsText(f);
@@ -809,6 +865,8 @@ async function nactiSoubory(e) {
 
   // Obrázky jsou velké. Když se sada do prohlížeče nevejde, uloží se bez nich
   // a po restartu se složka musí načíst znovu.
+  DATA.zdroj = { nazev: korenSlozky || (soubory.length + " vybraných souborů"),
+                 zpusob: "nacteno", kdy: dnes() };
   if (!ulozDoUloziste(ULOZ.data, DATA)) {
     const bezObrazku = { ...DATA, cviky: DATA.cviky.map(c => {
       const k = { ...c };
@@ -817,7 +875,7 @@ async function nactiSoubory(e) {
     }) };
     ulozDoUloziste(ULOZ.data, bezObrazku);
   }
-  obrazovkaStart();
+  obrazovkaNastaveni();
   const p = document.createElement("p");
   p.className = "small";
   p.textContent = "Načteno ze složky: " + nactene.join(", ") + ".";
@@ -858,6 +916,7 @@ async function nactiSoubory(e) {
         </div>` : ""}
       </div>
       <p class="dim small">Jak mají soubory vypadat, je popsané v README repozitáře.</p>`;
+    DATA = DATA || { cviky: [], sloty: [], sablony: { podle_nalady: {} }, plan: null };
     DATA = DATA || { cviky: [], sloty: [], sablony: { podle_nalady: {} }, plan: null };
     $("#soubor").onchange = nactiSoubory;
     $("#btn-slozka-vstup").onclick = () => $("#soubor").click();
