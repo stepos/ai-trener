@@ -54,6 +54,61 @@ button:active{transform:scale(.99)}
 .nahrada{width:100%;height:100%;padding:8px 12px;font-size:.85rem;border-radius:10px;
   background:var(--bg);color:var(--text);border:1px solid var(--line);
   text-align:left;line-height:1.3}
+/* Úvodní obrazovka s obrázkem na pozadí. Nápisy jsou přímo v obrázku,
+   proto se skrývá vlastní nadpis a obsah se skládá do volných míst:
+   pás hor nahoře a plocha nad ikonami dole. Rozmístění je v procentech
+   výšky, aby na různě vysokých telefonech drželo vůči kresbě. */
+body.s-pozadim{background:#20241f}
+/* Obrázek je širší poměrem než displej. Ukazuje se proto celý (contain)
+   a prázdné okraje vyplní rozmazaná kopie — nic se neořízne a plocha
+   přesto není prázdná. Pod obrázkem zbyde tmavý pás, do něj jdou tlačítka. */
+#pozadi{position:fixed;inset:0;z-index:0;overflow:hidden;background:#12140f}
+#pozadi .rozmazane{position:absolute;inset:-40px;background-size:cover;
+  background-position:center;filter:blur(28px) brightness(.55)}
+#pozadi .ostre{position:absolute;inset:0;background-size:contain;
+  background-position:center top;background-repeat:no-repeat}
+/* Obrázek je užší než telefon, takže se po stranách ořízne — ztmavení
+   okrajů z toho udělá vinětu místo useknutého nápisu. Spodní pás je
+   tmavší kvůli čitelnosti tlačítek. */
+#pozadi::after{content:"";position:absolute;inset:0;z-index:1;
+  background:
+    linear-gradient(180deg,rgba(12,14,11,.35) 0%,rgba(12,14,11,0) 22%,
+                    rgba(12,14,11,0) 42%,rgba(12,14,11,.55) 72%,rgba(12,14,11,.92) 100%),
+    linear-gradient(90deg,rgba(12,14,11,.6) 0%,rgba(12,14,11,0) 18%,
+                    rgba(12,14,11,0) 82%,rgba(12,14,11,.6) 100%)}
+body.s-pozadim #app{position:relative;z-index:1;min-height:100dvh;display:flex;
+  flex-direction:column;color:#f2f1ec}
+body.s-pozadim .wrap{padding-bottom:14px}
+.uvod-vrch{display:flex;justify-content:flex-end;padding-top:4px}
+.uvod-vrch .ikona{width:40px;height:40px;background:rgba(20,24,20,.55);color:#f2f1ec;
+  border-color:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
+.uvod-stav{margin-top:9vh;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.uvod-stav .kcal{font-size:1.7rem;font-weight:700;font-variant-numeric:tabular-nums}
+.uvod-stav .radka{font-size:.85rem;opacity:.9}
+.uvod-akce{margin-top:auto;margin-bottom:0;display:grid;gap:7px}
+.uvod-akce .dvojice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.uvod-akce button{padding:10px 12px;font-size:.92rem;text-align:center;
+  background:rgba(20,24,20,.58);color:#f2f1ec;border-color:rgba(255,255,255,.18);
+  backdrop-filter:blur(6px)}
+.uvod-akce button.hlavni{background:rgba(15,118,110,.85);border-color:transparent;color:#fff}
+.uvod-akce button:disabled{opacity:.4}
+.velke{font-size:1.9rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.pruh{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin:8px 0}
+.pruh>div{height:100%;background:var(--akce)}
+.pruh.pres>div{background:var(--varovani)}
+.polozka{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.polozka:last-child{border-bottom:0}
+.polozka .telo{flex:1;min-width:0}
+.polozka .nazev{word-break:break-word}
+.nahled{width:46px;height:46px;flex:none;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
+.smazat{width:34px;height:34px;flex:none;padding:0;text-align:center;border-radius:50%;
+  line-height:1;color:var(--dim)}
+.mrizka3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mrizka3 button{text-align:center;padding:12px 6px;font-size:.9rem}
+textarea,select,input[type=time]{font:inherit;width:100%;padding:12px;margin-top:8px;
+  border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+textarea{min-height:80px;resize:vertical}
+.prazdno{color:var(--dim);font-size:.9rem;padding:6px 0}
 .serie-tecky{display:flex;gap:6px;margin-top:8px}
 .tecka{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);
   display:grid;place-items:center;font-size:.75rem;color:var(--dim)}
@@ -82,7 +137,8 @@ input[type=file]{font-size:.85rem}
    2) ./data/*.json         — když stránka běží ze složky repa
    3) ruční načtení souboru — záchrana pro iOS bez signálu             */
 
-const ULOZ = { historie: "ai-trener-historie", data: "ai-trener-data", beh: "ai-trener-beh" };
+const ULOZ = { historie: "ai-trener-historie", data: "ai-trener-data", beh: "ai-trener-beh",
+               jidlo: "ai-trener-jidlo-fronta" };
 
 function nactiZUloziste(klic) {
   try { const v = localStorage.getItem(klic); return v ? JSON.parse(v) : null; }
@@ -281,40 +337,99 @@ function vychoziOpakovani(text) {
 function obrazovkaStart() {
   const jednotka = najdiJednotku();
   const h = historie();
-  let planHtml;
-  if (!DATA.plan) {
-    planHtml = `<p class="dim small">Není načtený žádný plán — funguje režim podle nálady.</p>`;
-  } else if (jednotka) {
-    const dnesni = jednotka.datum === dnes();
-    planHtml = `<p class="dim small">${dnesni ? "Na dnešek" : "Nejbližší nesplněná jednotka z " + jednotka.datum}:
-      <strong>${jednotka.nazev}</strong> (${jednotka.bloky.length} bloků)</p>`;
-  } else {
-    planHtml = `<p class="dim small">V plánu už nezbývá nesplněná jednotka.</p>`;
-  }
+  const spozadim = !!DATA.pozadi;
 
-  app().innerHTML = `
-    <div class="hlavicka">
-      <h1>AI trenér</h1>
-      <button class="ikona" id="btn-nastaveni" title="Nastavení" aria-label="Nastavení">⚙</button>
-    </div>
-    <p class="dim small">${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum
-                                    : "Zatím žádný odcvičený trénink."}</p>
-    <div class="karta">
-      <h2>Jdeme na to</h2>
-      ${planHtml}
-      <div class="mrizka">
-        <button class="hlavni" id="btn-plan" ${jednotka ? "" : "disabled"}>Trénink podle plánu</button>
-        <button class="stred" id="btn-nalada">Podle nálady — vyberu partii</button>
+  let planText;
+  if (!DATA.plan) planText = "Bez plánu — jde režim podle nálady.";
+  else if (jednotka) planText = (jednotka.datum === dnes() ? "Na dnešek: " : "Nejbližší: ")
+                                + jednotka.nazev + " (" + jednotka.bloky.length + " bloků)";
+  else planText = "V plánu už nezbývá nesplněná jednotka.";
+
+  if (spozadim) {
+    nastavPozadi();
+    const v = vyziva();
+    const ceka = frontaJidla().length;
+    const stare = v && v.dnes && v.dnes.datum !== dnes();
+
+    let kcalText = "", bilkText = "";
+    if (v && v.cil && v.cil.kcal && !stare) {
+      const snedeno = (v.dnes && v.dnes.kcal) || 0;
+      const zbyva = v.cil.kcal - snedeno;
+      kcalText = zbyva >= 0 ? zbyva + " kcal" : "o " + (-zbyva) + " kcal přes";
+      const chybi = v.cil.bilkoviny_min - ((v.dnes && v.dnes.bilkoviny) || 0);
+      bilkText = (zbyva >= 0 ? "zbývá dnes · " : "přes cíl · ")
+               + (chybi > 0 ? "do bílkovin chybí " + chybi + " g" : "bílkoviny splněné");
+    } else if (v) {
+      kcalText = "?";
+      bilkText = stare ? "data jsou z " + v.dnes.datum : "cíl zatím neznám";
+    }
+
+    app().innerHTML = `
+      <div class="uvod-vrch">
+        <button class="ikona" id="btn-nastaveni" title="Nastavení" aria-label="Nastavení">⚙</button>
       </div>
-    </div>`;
+      <div class="uvod-stav">
+        ${kcalText ? `<div class="kcal">${kcalText}</div>
+                      <div class="radka">${bilkText}</div>` : ""}
+        <div class="radka" style="margin-top:6px">${planText}</div>
+      </div>
+      <div class="uvod-akce">
+        <button class="hlavni" id="btn-plan" ${jednotka ? "" : "disabled"}>Trénink podle plánu</button>
+        <div class="dvojice">
+          <button id="btn-nalada">Podle nálady</button>
+          <button id="btn-jidlo" ${v ? "" : "disabled"}>Jídlo${ceka ? " · " + ceka : ""}</button>
+        </div>
+        <div class="radka stred small" style="opacity:.75">
+          ${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum
+                     : "Zatím žádný odcvičený trénink."}</div>
+      </div>`;
+  } else {
+    app().innerHTML = `
+      <div class="hlavicka">
+        <h1>AI trenér</h1>
+        <button class="ikona" id="btn-nastaveni" title="Nastavení" aria-label="Nastavení">⚙</button>
+      </div>
+      <p class="dim small">${h.length ? h.length + "× odtrénováno · naposledy " + h[h.length - 1].datum
+                                      : "Zatím žádný odcvičený trénink."}</p>
+      <div class="karta">
+        <h2>Jdeme na to</h2>
+        <p class="dim small">${planText}</p>
+        <div class="mrizka">
+          <button class="hlavni" id="btn-plan" ${jednotka ? "" : "disabled"}>Trénink podle plánu</button>
+          <button class="stred" id="btn-nalada">Podle nálady — vyberu partii</button>
+        </div>
+      </div>
+      ${kartaJidla()}`;
+  }
 
   $("#btn-plan").onclick = () => { spustTrenink(jednotka); };
   $("#btn-nalada").onclick = obrazovkaPartie;
   $("#btn-nastaveni").onclick = obrazovkaNastaveni;
+  if ($("#btn-jidlo")) $("#btn-jidlo").onclick = obrazovkaJidlo;
+}
+
+/** Obrázek na pozadí patří jen úvodní obrazovce — jinde by rušil čtení. */
+function nastavPozadi() {
+  document.body.classList.add("s-pozadim");
+  let vrstva = document.getElementById("pozadi");
+  if (!vrstva) {
+    vrstva = document.createElement("div");
+    vrstva.id = "pozadi";
+    vrstva.innerHTML = `<div class="rozmazane"></div><div class="ostre"></div>`;
+    vrstva.querySelector(".rozmazane").style.backgroundImage = `url("${DATA.pozadi}")`;
+    vrstva.querySelector(".ostre").style.backgroundImage = `url("${DATA.pozadi}")`;
+    document.body.insertBefore(vrstva, document.body.firstChild);
+  }
+}
+function zrusPozadi() {
+  document.body.classList.remove("s-pozadim");
+  const vrstva = document.getElementById("pozadi");
+  if (vrstva) vrstva.remove();
 }
 
 /** Nastavení: odkud jsou data, co v nich je, a jak je vyměnit. */
 function obrazovkaNastaveni() {
+  zrusPozadi();
   const h = historie();
   const z = DATA.zdroj || {};
   const obrazku = DATA.cviky.filter(c => c.obrazek).length;
@@ -400,6 +515,7 @@ const NAZVY_PARTII = { nohy: "Nohy", zada: "Záda", hrudnik: "Hrudník",
 
 /** Přidání další partie k rozcvičenému tréninku. */
 function obrazovkaPridatPartii() {
+  zrusPozadi();
   const partie = Object.keys(DATA.sablony.podle_nalady);
   app().innerHTML = `
     <button class="zpet" id="btn-zpet">← zpět na trénink</button>
@@ -422,6 +538,7 @@ function obrazovkaPridatPartii() {
 }
 
 function obrazovkaPartie() {
+  zrusPozadi();
   const partie = Object.keys(DATA.sablony.podle_nalady);
   const vybrane = new Set();
   app().innerHTML = `
@@ -464,6 +581,7 @@ function spustTrenink(jednotka) {
 }
 
 function obrazovkaTrenink() {
+  zrusPozadi();
   const b = STAV.bloky;
   const nadalsi = b.findIndex(x => x.hotove.length < x.serie && !x.volitelne);
   const naRade = nadalsi >= 0 ? nadalsi : b.findIndex(x => x.hotove.length < x.serie);
@@ -524,6 +642,7 @@ function obrazovkaTrenink() {
 }
 
 function obrazovkaBlok(i) {
+  zrusPozadi();
   const blok = STAV.bloky[i];
   // Hlavní cvik je předvybraný — appka říká, co cvičit. Výběr z alternativ
   // je až pro případ, že je stroj obsazený (tlačítko „Vybrat jiný cvik").
@@ -655,6 +774,7 @@ function spustPauzu(sekundy, potom) {
 }
 
 function obrazovkaVyberCviku(i) {
+  zrusPozadi();
   const blok = STAV.bloky[i];
   app().innerHTML = `
     <button class="zpet" id="btn-zpet">← zpět na bloky</button>
@@ -685,6 +805,7 @@ function obrazovkaVyberCviku(i) {
     Schválně bez nativního confirm(): ten jde zavřít a pak to vypadá,
     že tlačítko nefunguje. */
 function obrazovkaUkoncit() {
+  zrusPozadi();
   const zapsano = STAV.bloky.reduce((n, b) => n + b.hotove.length, 0);
   if (!zapsano) {
     STAV = null;
@@ -720,6 +841,7 @@ function obrazovkaUkoncit() {
 }
 
 function obrazovkaKonec() {
+  zrusPozadi();
   const serie = STAV.bloky.filter(b => b.cvik).flatMap(b =>
     b.hotove.map(h => ({ poradi: b.poradi, slot: b.slot, cvik: b.cvik, ...h })));
   app().innerHTML = `
@@ -782,6 +904,271 @@ function obrazovkaKonec() {
     }
     ukazText(zaznam, `trenink-${zaznam.datum}.json`);
   };
+}
+
+
+/* ---------- Jídlo ---------- */
+/* Appka kalorie nepočítá a do tabulek nezapisuje. Sbírá jen podklady —
+   fotku, text nebo položku z knihovny — a ty pak zpracuje model.
+   Viz DECISIONS.md 2026-09-05. */
+
+function vyziva() { return DATA.vyziva || null; }
+function frontaJidla() { return nactiZUloziste(ULOZ.jidlo) || []; }
+function ulozFrontu(f) { return ulozDoUloziste(ULOZ.jidlo, f); }
+
+/** Co už je v datech zapsané, z fronty zmizí — pozná se podle zapis_id,
+    které do CSV píše ./import-jidlo.sh. */
+function uklidHotoveJidlo() {
+  const v = vyziva();
+  if (!v) return;
+  const hotova = new Set((v.hotove || []).map(p => p.zapis_id).filter(Boolean));
+  const f = frontaJidla();
+  const zbyle = f.filter(p => !hotova.has(p.id));
+  if (zbyle.length !== f.length) ulozFrontu(zbyle);
+}
+
+function idZapisu() {
+  const d = new Date(), p = (n) => String(n).padStart(2, "0");
+  return "z-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" +
+         p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + "-" +
+         Math.random().toString(36).slice(2, 6);
+}
+
+function popisJidla(p) {
+  if (p.typ === "knihovna") return p.nazev + (p.krat && p.krat !== "1" ? " × " + p.krat : "");
+  if (p.typ === "text") return p.text;
+  return p.poznamka || "fotka bez popisu";
+}
+
+/** Karta na úvodní obrazovce: kolik zbývá a co ještě čeká na zpracování. */
+function kartaJidla() {
+  const v = vyziva();
+  if (!v || !v.cil || !v.cil.kcal) return "";
+  const ceka = frontaJidla().length;
+  const stare = v.dnes && v.dnes.datum !== dnes();
+
+  let hlavni, detail;
+  if (stare) {
+    hlavni = "?";
+    detail = `Data jsou z ${v.dnes.datum}, dnes je ${dnes()}. Zbytek do cíle neznám.`;
+  } else {
+    const snedeno = (v.dnes && v.dnes.kcal) || 0;
+    const zbyva = v.cil.kcal - snedeno;
+    hlavni = zbyva >= 0 ? zbyva + " kcal" : "o " + (-zbyva) + " kcal přes cíl";
+    const chybi = v.cil.bilkoviny_min - ((v.dnes && v.dnes.bilkoviny) || 0);
+    detail = `Snědeno ${snedeno} z ${v.cil.kcal} kcal · ` +
+             (chybi > 0 ? "do bílkovin chybí " + chybi + " g"
+                        : "bílkoviny splněné");
+  }
+
+  const podil = stare ? 0 :
+    Math.min(100, Math.round(100 * (((v.dnes && v.dnes.kcal) || 0) / v.cil.kcal)));
+
+  return `
+    <div class="karta">
+      <h2>Jídlo</h2>
+      <div class="velke">${hlavni}</div>
+      <div class="pruh ${(!stare && v.cil.kcal - ((v.dnes && v.dnes.kcal) || 0) < 0) ? "pres" : ""}">
+        <div style="width:${podil}%"></div>
+      </div>
+      <p class="dim small">${detail}</p>
+      <button class="hlavni" id="btn-jidlo">Vložit jídlo${ceka ? " · " + ceka + " ke zpracování" : ""}</button>
+    </div>`;
+}
+
+function obrazovkaJidlo() {
+  zrusPozadi();
+  const v = vyziva();
+  const f = frontaJidla();
+  const knihovna = (v && v.knihovna) || [];
+  const hotove = (v && v.hotove) || [];
+
+  app().innerHTML = `
+    <button class="zpet" id="btn-zpet">← zpět</button>
+    <h1>Jídlo</h1>
+    ${v && v.cil && v.cil.kcal ? `<p class="dim small">Cíl ${v.cil.kcal} kcal,
+      ${v.cil.bilkoviny_min}–${v.cil.bilkoviny_max} g bílkovin · ${v.dnes.datum}</p>` : ""}
+
+    <div class="karta">
+      <h2 class="small">Přidat</h2>
+      <div class="mrizka3">
+        <button id="btn-foto">📷<br>Vyfotit</button>
+        <button id="btn-text">✏️<br>Napsat</button>
+        <button id="btn-knihovna" ${knihovna.length ? "" : "disabled"}>⭐<br>Z knihovny</button>
+      </div>
+      <div id="formular"></div>
+    </div>
+
+    <div class="karta">
+      <h2 class="small">Ke zpracování ${f.length ? "· " + f.length : ""}</h2>
+      <div id="seznam-fronty"></div>
+      <button class="hlavni" id="btn-predat" style="margin-top:10px"
+        ${f.length ? "" : "disabled"}>Předat ke zpracování</button>
+      <p class="dim small" id="stav-predani"></p>
+    </div>
+
+    <div class="karta">
+      <h2 class="small">Hotové dnes</h2>
+      ${hotove.length ? hotove.map(p => `
+        <div class="polozka">
+          <div class="telo">
+            <div class="nazev">${p.polozka}</div>
+            <div class="dim small">${[p.cas, p.mnozstvi, p.zdroj].filter(Boolean).join(" · ")}</div>
+          </div>
+          <div class="cislo">${p.kcal} kcal<br>${p.bilkoviny_g} g B</div>
+        </div>`).join("")
+        : `<div class="prazdno">Dnes ještě nic zapsaného.</div>`}
+    </div>
+
+    <input type="file" id="vstup-foto" accept="image/*" capture="environment" hidden>`;
+
+  $("#btn-zpet").onclick = obrazovkaStart;
+  $("#btn-foto").onclick = () => $("#vstup-foto").click();
+  $("#vstup-foto").onchange = naberFotku;
+  $("#btn-text").onclick = formularText;
+  if (knihovna.length) $("#btn-knihovna").onclick = formularKnihovna;
+  $("#btn-predat").onclick = predejJidlo;
+  vykresliFrontuJidla();
+}
+
+function vykresliFrontuJidla() {
+  const box = $("#seznam-fronty");
+  if (!box) return;
+  const f = frontaJidla();
+  box.innerHTML = "";
+  if (!f.length) {
+    box.innerHTML = `<div class="prazdno">Nic nečeká. Vyfoť jídlo nebo napiš, cos jedl.</div>`;
+    return;
+  }
+  f.forEach(p => {
+    const radek = document.createElement("div");
+    radek.className = "polozka";
+    if (p.foto) {
+      const img = document.createElement("img");
+      img.className = "nahled"; img.src = p.foto; radek.appendChild(img);
+    }
+    const telo = document.createElement("div");
+    telo.className = "telo";
+    telo.innerHTML = `<div class="nazev"></div>
+      <div class="dim small">${[p.datum, p.cas, p.typ === "knihovna" ? "z knihovny" : ""]
+        .filter(Boolean).join(" · ")}</div>`;
+    telo.querySelector(".nazev").textContent = popisJidla(p);
+    radek.appendChild(telo);
+    const smaz = document.createElement("button");
+    smaz.className = "smazat"; smaz.textContent = "✕";
+    smaz.setAttribute("aria-label", "Smazat");
+    smaz.onclick = () => {
+      ulozFrontu(frontaJidla().filter(x => x.id !== p.id));
+      obrazovkaJidlo();
+    };
+    radek.appendChild(smaz);
+    box.appendChild(radek);
+  });
+}
+
+function pridejDoFronty(polozka) {
+  polozka.id = idZapisu();
+  polozka.datum = dnes();
+  const f = frontaJidla();
+  f.push(polozka);
+  if (!ulozFrontu(f)) {
+    alert("Prohlížeč nepovolil uložení. Předej frontu hned, jinak o zápis přijdeš.");
+  }
+  obrazovkaJidlo();
+}
+
+function formularText() {
+  const box = $("#formular");
+  box.innerHTML = `
+    <textarea id="popis" placeholder="dva rohlíky s máslem a šunkou"></textarea>
+    <input type="time" id="cas-jidla">
+    <div class="mrizka" style="margin-top:8px">
+      <button class="hlavni" id="btn-ulozit">Přidat do fronty</button>
+    </div>`;
+  $("#popis").focus();
+  $("#btn-ulozit").onclick = () => {
+    const t = $("#popis").value.trim();
+    if (!t) return;
+    pridejDoFronty({ typ: "text", text: t, cas: $("#cas-jidla").value });
+  };
+}
+
+function formularKnihovna() {
+  const knihovna = (vyziva() && vyziva().knihovna) || [];
+  const box = $("#formular");
+  box.innerHTML = `
+    <select id="vyber">${knihovna.map(p =>
+      `<option value="${p.nazev.replace(/"/g, "&quot;")}">${p.nazev} — ${p.kcal} kcal</option>`
+    ).join("")}</select>
+    <input type="time" id="cas-jidla">
+    <div class="radek" style="margin-top:8px">
+      <button id="krat-min">−</button>
+      <div class="hodnota stred" id="krat" style="font-size:1.2rem;font-weight:600">1×</div>
+      <button id="krat-plus">+</button>
+    </div>
+    <div class="mrizka" style="margin-top:8px">
+      <button class="hlavni" id="btn-ulozit">Přidat do fronty</button>
+    </div>`;
+  let krat = 1;
+  const prekresli = () => { $("#krat").textContent = krat + "×"; };
+  $("#krat-min").onclick = () => { krat = Math.max(1, krat - 1); prekresli(); };
+  $("#krat-plus").onclick = () => { krat = Math.min(9, krat + 1); prekresli(); };
+  $("#btn-ulozit").onclick = () => {
+    pridejDoFronty({ typ: "knihovna", nazev: $("#vyber").value,
+                     krat: String(krat), cas: $("#cas-jidla").value });
+  };
+}
+
+function naberFotku(e) {
+  const soubor = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!soubor) return;
+  zmensiFotku(soubor, (dataUrl) => {
+    const box = $("#formular");
+    box.innerHTML = `
+      <img src="${dataUrl}" style="width:100%;border-radius:10px;margin-top:10px">
+      <textarea id="popis" placeholder="poznámka — co to je, jak velká porce"></textarea>
+      <input type="time" id="cas-jidla">
+      <div class="mrizka" style="margin-top:8px">
+        <button class="hlavni" id="btn-ulozit">Přidat do fronty</button>
+      </div>`;
+    $("#btn-ulozit").onclick = () => {
+      pridejDoFronty({ typ: "foto", foto: dataUrl,
+                       poznamka: $("#popis").value.trim(), cas: $("#cas-jidla").value });
+    };
+  });
+}
+
+/** Fotka z telefonu má i 4 MB. Do fronty jde zmenšená — na štítek i na
+    velikost porce 1024 px stačí a úložiště prohlížeče se nezahltí. */
+function zmensiFotku(soubor, hotovo) {
+  const citac = new FileReader();
+  citac.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const pomer = Math.min(1, 1024 / Math.max(img.width, img.height));
+      const platno = document.createElement("canvas");
+      platno.width = Math.round(img.width * pomer);
+      platno.height = Math.round(img.height * pomer);
+      platno.getContext("2d").drawImage(img, 0, 0, platno.width, platno.height);
+      hotovo(platno.toDataURL("image/jpeg", 0.75));
+    };
+    img.onerror = () => alert("Fotku se nepodařilo načíst.");
+    img.src = citac.result;
+  };
+  citac.readAsDataURL(soubor);
+}
+
+function predejJidlo() {
+  const f = frontaJidla();
+  if (!f.length) return;
+  const balik = { verze: 1, vytvoreno: new Date().toISOString(), polozky: f };
+  const jmeno = `jidlo-${dnes()}.json`;
+  stahni(balik, jmeno);
+  // Fronta se nemaže sama — zmizí až tím, že se položka objeví mezi hotovými
+  // v dalším buildu. Jinak by se ztratilo jídlo, jehož soubor se nedonesl.
+  $("#stav-predani").textContent =
+    `Soubor ${jmeno} uložen. Ve frontě zůstává, dokud ho nezapíšu do tabulky.`;
 }
 
 /* ---------- Soubory ---------- */
@@ -923,6 +1310,7 @@ async function nactiSoubory(e) {
     if (podporujeSlozku) $("#btn-slozka").onclick = pripojSlozku;
     return;
   }
+  uklidHotoveJidlo();
   const beh = nactiZUloziste(ULOZ.beh);
   if (beh && beh.datum === dnes() && confirm("Máš rozcvičený trénink z dneška. Pokračovat?")) {
     STAV = beh; obrazovkaTrenink(); return;
